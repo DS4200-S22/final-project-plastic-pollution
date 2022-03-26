@@ -4,3 +4,7 @@ d3.select("#vis-container")
   .attr("x", 20)
   .attr("y", 20)
   .text("Hello World!");
+
+// Read in data and print to console
+d3.csv("data/plastic_pollution_data.csv").then((data) => {console.log(data)})
+
