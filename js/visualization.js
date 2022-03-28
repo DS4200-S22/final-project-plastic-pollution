@@ -1,119 +1,98 @@
 // Read in data and print to console
-// d3.csv("data/plastic_pollution_data.csv").then((data) => {console.log(data)})
+d3.csv("data/plastic_pollution_data.csv").then((data) => {console.log(data)})
 
-// Margins and dimensions
-// const margin = { top: 50, right: 50, bottom: 50, left: 200 };
-// const width = 900;
-// const height = 650;
+// WORLD MAP CODE STARTS HERE...
+const w = 920;
+const h = 480;
+const svg = d3.select("#vis-holder").append("svg").attr("preserveAspectRatio", "xMinYMin meet").style("background-color", "#62b6ef")
+    .attr("viewBox", "0 0 " + w + " " + h)
+    .classed("svg-content", true);
 
+let projection = d3.geoEquirectangular()
+let path = d3.geoPath().projection(projection);
 
-// Add graph placeholder
-// const svg1 = d3.select("#vis-holder")
-//     .append("svg")
-//     .attr("width", width - margin.left - margin.right)
-//     .attr("height", height - margin.top - margin.bottom)
-//     .attr("viewBox", [0, 0, width, height]);
+// load data
+const worldmap = d3.json("data/countries.geojson");
+const cities = d3.csv("data/cities.csv");
 
-const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-    height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
-const svg = d3.select("#vis-holder")
-    .append("svg")
-    .style("cursor", "move");
-
-svg.attr("viewBox", "50 10 " + width + " " + height)
-    .attr("preserveAspectRatio", "xMinYMin");
-
-let map = svg.append("g")
-    .attr("class", "map");
-const zoom = d3.zoom()
-    .on("zoom", function () {
-        let transform = d3.zoomTransform(this);
-        map.attr("transform", transform);
-    });
-
-svg.call(zoom);
-
-
-d3.queue()
-    .defer(d3.json, "data/50m.json")
-    .defer(d3.json, "data/population.json")
-    .await(function (error, world, data) {
-        if (error) {
-            console.error('Oh dear, something went wrong: ' + error);
-        }
-        else {
-            drawMap(world, data);
-        }
-    });
-
-function drawMap(world, data) {
-    // geoMercator projection
-    const projection = d3.geoMercator() //d3.geoOrthographic()
-        .scale(130)
-        .translate([width / 2, height / 1.5]);
-
-    // geoPath projection
-    let path = d3.geoPath().projection(projection);
-
-    //colors for population metrics
-    let color = d3.scaleThreshold()
-        .domain([10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000, 500000000, 1500000000])
-        .range(["#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda", "#8c96c6", "#8c6bb1", "#88419d", "#810f7c", "#4d004b"]);
-
-    let features = topojson.feature(world, world.objects.countries).features;
-    let populationById = {};
-
-    data.forEach(function (d) {
-        populationById[d.country] = {
-            total: +d.total,
-            females: +d.females,
-            males: +d.males
-        }
-    });
-    features.forEach(function (d) {
-        d.details = populationById[d.properties.name] ? populationById[d.properties.name] : {};
-    });
-
-    map.append("g")
-        .selectAll("path")
-        .data(features)
-        .enter().append("path")
-        .attr("name", function (d) {
-            return d.properties.name;
-        })
-        .attr("id", function (d) {
-            return d.id;
-        })
+Promise.all([worldmap, cities]).then(function(values){
+    // draw map
+    svg.selectAll("path")
+        .data(values[0].features)
+        .enter()
+        .append("path")
+        .attr("class","continent")
         .attr("d", path)
-        .style("fill", function (d) {
-            return d.details && d.details.total ? color(d.details.total) : undefined;
-        })
-        .on('mouseover', function (d) {
-            d3.select(this)
-                .style("stroke", "white")
-                .style("stroke-width", 1)
-                .style("cursor", "pointer");
+        .style("fill", "#050505")
+        .style("stroke", "#f86405")
+        .style("stroke-width", "0.3")
 
-            d3.select(".country")
-                .text(d.properties.name);
+        // // draw points
+        // svg.selectAll("circle")
+        //     .data(values[1])
+        //     .enter()
+        //     .append("circle")
+        //     .attr("class","circles")
+        //     .attr("cx", function(d) {return projection([d.Longitude, d.Lattitude])[0];})
+        //     .attr("cy", function(d) {return projection([d.Longitude, d.Lattitude])[1];})
+        //     .attr("r", "1px"),
+        // // add labels
+        // svg.selectAll("text")
+        //     .data(values[1])
+        //     .enter()
+        //     .append("text")
+        //     .text(function(d) {
+        //         return d.City;
+        //     })
+        //     .attr("x", function(d) {return projection([d.Longitude, d.Lattitude])[0] + 5;})
+        //     .attr("y", function(d) {return projection([d.Longitude, d.Lattitude])[1] + 15;})
+        //     .attr("class","labels");
 
-            d3.select(".females")
-                .text(d.details && d.details.females && "Female " + d.details.females || "¯\\_(ツ)_/¯");
+});
 
-            d3.select(".males")
-                .text(d.details && d.details.males && "Male " + d.details.males || "¯\\_(ツ)_/¯");
 
-            d3.select('.details')
-                .style('visibility', "visible")
-        })
-        .on('mouseout', function (d) {
-            d3.select(this)
-                .style("stroke", null)
-                .style("stroke-width", 0.25);
+// PIE CHART CODE STARTS HERE...
+// set the dimensions and margins of the graph
+const width2 = 450
+const height2 = 450
+const margin2 = 40
 
-            d3.select('.details')
-                .style('visibility', "hidden");
-        });
-}
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+const radius = Math.min(width2, height2) / 2 - margin2;
+
+// append the svg object to the div called 'viz-holder'
+let svg2 = d3.select("#viz-holder")
+    .append("svg")
+    .attr("width", width2)
+    .attr("height", height2)
+    .append("g")
+    .attr("transform", "translate(" + width2 / 2 + "," + height2 / 2 + ")");
+
+// Create dummy data
+const data2 = {a: 9, b: 20, c: 30, d: 8, e: 12};
+
+// set the color scale
+let color = d3.scaleOrdinal()
+    .domain(data2)
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
+
+// Compute the position of each group on the pie:
+let pie = d3.pie()
+    .value(function (d) {
+        return d.value;
+    });
+const data_ready = pie(d3.entries(data2));
+
+// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+svg2.selectAll('path')
+    .data(data_ready)
+    .enter()
+    .append('path')
+    .attr('d', d3.arc()
+        .innerRadius(100)         // This is the size of the donut hole
+        .outerRadius(radius))
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "black")
+    .style("stroke-width", "2px")
+    .style("opacity", 0.7)
 
