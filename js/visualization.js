@@ -52,6 +52,7 @@ Promise.all([worldmap, cities]).then(function(values){
 
 
 // PIE CHART CODE STARTS HERE...
+// SOURCE: https://d3-graph-gallery.com/graph/pie_basic.html
 // set the dimensions and margins of the graph
 const width2 = 450
 const height2 = 450
