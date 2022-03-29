@@ -52,7 +52,7 @@ Promise.all([worldmap, cities]).then(function(values){
 
 
 // PIE CHART CODE STARTS HERE...
-// SOURCE: https://www.educative.io/edpresso/how-to-create-a-pie-chart-using-d3
+// SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
 // set the dimensions and margins of the graph
 const width2 = 450
 const height2 = 450
