@@ -1,10 +1,10 @@
 // Read in data and print to console
-d3.csv("data/plastic_pollution_data.csv").then((data) => {console.log(data)})
+d3.csv("data/updated_data.csv").then((data) => {console.log(data)})
 
 // WORLD MAP CODE STARTS HERE...
 const w = 920;
 const h = 480;
-const svg = d3.select("#vis-holder").append("svg").attr("preserveAspectRatio", "xMinYMin meet").style("background-color", "#62b6ef")
+const svg = d3.select("#map").append("svg").attr("preserveAspectRatio", "xMinYMin meet").style("background-color", "#62b6ef")
     .attr("viewBox", "0 0 " + w + " " + h)
     .classed("svg-content", true);
 
@@ -52,7 +52,7 @@ Promise.all([worldmap, cities]).then(function(values){
 
 
 // PIE CHART CODE STARTS HERE...
-// SOURCE: https://d3-graph-gallery.com/graph/pie_basic.html
+// SOURCE: https://www.educative.io/edpresso/how-to-create-a-pie-chart-using-d3
 // set the dimensions and margins of the graph
 const width2 = 450
 const height2 = 450
@@ -62,7 +62,7 @@ const margin2 = 40
 const radius = Math.min(width2, height2) / 2 - margin2;
 
 // append the svg object to the div called 'viz-holder'
-let svg2 = d3.select("#viz-holder")
+var svg2 = d3.select("#pie")
     .append("svg")
     .attr("width", width2)
     .attr("height", height2)
@@ -70,30 +70,57 @@ let svg2 = d3.select("#viz-holder")
     .attr("transform", "translate(" + width2 / 2 + "," + height2 / 2 + ")");
 
 // Create dummy data
-const data2 = {a: 9, b: 20, c: 30, d: 8, e: 12};
+var data2 = [{name: "A", share: 20.70}, 
+                    {name: "B", share: 30.92},
+                    {name: "C", share: 15.42},
+                    {name: "D", share: 13.65},
+                    {name: "E", share: 19.31}];
 
-// set the color scale
-let color = d3.scaleOrdinal()
-    .domain(data2)
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
 
-// Compute the position of each group on the pie:
-let pie = d3.pie()
-    .value(function (d) {
-        return d.value;
-    });
-const data_ready = pie(d3.entries(data2));
+// set the color scale (doesn't work)
+//var color = d3.scaleOrdinal()
+  //.domain(data2)
+  //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+
+// Creaing pie chart:
+var pie = d3.pie().value(function(d) { 
+                return d.share; 
+            });
+
+// Creating arc
+var arc = d3.arc()
+                .outerRadius(radius)
+                .innerRadius(0);
+
+// Grouping different arcs
+var arcs = svg2.selectAll("arc")
+                    .data(pie(data2))
+                    .enter()
+                    .append("g");
+
+// Appending path
+arcs.append("path")
+            .attr("fill", (data, i)=>{
+                let value=data.data2;
+                return d3.schemeSet3[i+1];
+            })
+            .attr("d", arc);
+
+// Add Labels
+var label = d3.arc()
+                      .outerRadius(radius)
+                      .innerRadius(0);
+
+
+arcs.append("text")
+           .attr("transform", function(d) { 
+                    return "translate(" + label.centroid(d) + ")"; 
+            })
+           .text(function(d) { return d.data.name; })
+           .style("font-family", "arial")
+           .style("font-size", 15);
+
 
 // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-svg2.selectAll('path')
-    .data(data_ready)
-    .enter()
-    .append('path')
-    .attr('d', d3.arc()
-        .innerRadius(100)         // This is the size of the donut hole
-        .outerRadius(radius))
-    .attr('fill', function(d){ return(color(d.data.key)) })
-    .attr("stroke", "black")
-    .style("stroke-width", "2px")
-    .style("opacity", 0.7)
+
 
