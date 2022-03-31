@@ -28,6 +28,10 @@ h1, h2, h3 {
 .pie {
 
 }
+
+.bar {
+
+}
 /*Does not work for some reason?*/
 .continent {
 	fill: #f0e4dd;
@@ -36,7 +40,7 @@ h1, h2, h3 {
 }
 
 .pie {
-  
+
 }
 
 .circles {
