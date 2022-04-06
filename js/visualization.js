@@ -1,5 +1,4 @@
 // Read in data and print to console
-d3.csv("data/updated_data.csv").then((data) => {console.log(data)})
 
 // WORLD MAP CODE STARTS HERE...
 const w = 920;
@@ -62,7 +61,7 @@ const margin2 = 40
 const radius = Math.min(width2, height2) / 2 - margin2;
 
 // append the svg object to the div called 'viz-holder'
-var svg2 = d3.select("#pie")
+let svg2 = d3.select("#pie")
     .append("svg")
     .attr("width", width2)
     .attr("height", height2)
@@ -70,30 +69,29 @@ var svg2 = d3.select("#pie")
     .attr("transform", "translate(" + width2 / 2 + "," + height2 / 2 + ")");
 
 // Create dummy data
-var data2 = [{name: "A", share: 20.70},
+const data2 = [{name: "A", share: 20.70},
                     {name: "B", share: 30.92},
                     {name: "C", share: 15.42},
                     {name: "D", share: 13.65},
                     {name: "E", share: 19.31}];
 
-
 // set the color scale (doesn't work)
-//var color = d3.scaleOrdinal()
+//const color = d3.scaleOrdinal()
   //.domain(data2)
   //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
 
 // Creaing pie chart:
-var pie = d3.pie().value(function(d) {
+const pie = d3.pie().value(function(d) {
                 return d.share;
             });
 
 // Creating arc
-var arc = d3.arc()
+const arc = d3.arc()
                 .outerRadius(radius)
                 .innerRadius(0);
 
 // Grouping different arcs
-var arcs = svg2.selectAll("arc")
+const arcs = svg2.selectAll("arc")
                     .data(pie(data2))
                     .enter()
                     .append("g");
@@ -107,7 +105,7 @@ arcs.append("path")
             .attr("d", arc);
 
 // Add Labels
-var label = d3.arc()
+const label = d3.arc()
                       .outerRadius(radius)
                       .innerRadius(0);
 
@@ -123,9 +121,10 @@ arcs.append("text")
 
 // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
 
-// DOUBLE BAR GRAPH CODE STARTS HERE...
-// SOURCE: https://bl.ocks.org/LyssenkoAlex/21df1ce37906bdb614bbf4159618699d
+/*
 
+// DOUBLE BAR GRAPH CODE STARTS HERE...
+// SOURCE: https://bl.ocks.org/LyssenkoAlex/21df1ce37906bdb614bbf4159618699
 // hardcoded data for barchart
 const bar_data = [
                  { key: 'North America', values:
@@ -189,6 +188,7 @@ const bar_data = [
     /*
        Axes
      */
+ /*
 
     // create x scale
     let x0  = d3.scaleBand().rangeRound([0, width], 0.).padding(0.2);
@@ -253,11 +253,11 @@ const bar_data = [
              .style("fill", function(d) { return color(d.grpName) })
              .attr("y", function(d) { return y(d.grpValue); })
              .attr("height", function(d) { return height - y(d.grpValue); })
-
   /*
      Legend
   */
 
+/*
   // Add legend to graph
   let legend = svg3.selectAll(".legend")
       .data(bar_data[0].values.map(function(d) { return d.grpName; }).reverse())
@@ -272,7 +272,6 @@ const bar_data = [
       .attr("height", 18)
       .style("fill", function(d) { return color(d); });
 
-
   // create text for legend
   legend.append("text")
       .attr("x", width - 24)
@@ -280,3 +279,197 @@ const bar_data = [
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(function(d) {return d; });
+
+*/
+
+// set the dimensions and margins of the graph
+var margin4 = {top: 10, right: 30, bottom: 20, left: 50},
+    width4 = 1500 - margin4.left - margin4.right,
+    height4= 1500 - margin4.top - margin4.bottom;
+
+// append the svg object to the body of the page
+
+var svg5 = d3.select("#bar")
+    .append("svg")
+    .attr("width", width4 + margin4.left + margin4.right)
+    .attr("height", height4 + margin4.top + margin4.bottom)
+    .append("g");
+    //.attr("transform",`translate(${margin4.left},${margin4.top})`);
+
+// Parse the Data
+
+d3.csv("data/updated_data.csv").then(function(data) {
+
+    // List of subgroups = header of the csv files = soil condition here
+    const subgroups = data.columns.slice(13, 15)
+console.log(subgroups)
+    // List of groups = each country
+    const groups = data.map(d => d.country)
+console.log(groups)
+
+    // Add X axis
+    const x = d3.scaleBand()
+        .domain(groups)
+        .range([0, width4])
+        .padding([0.2])
+    svg.append("g")
+        .attr("transform", "translate(0," + height4 + ")")
+        .call(d3.axisBottom(x).tickSize(0));
+
+    // Add Y axis
+    const y = d3.scaleLinear()
+        .domain([0, 40])
+        .range([ height4, 0 ]);
+    svg5.append("g")
+        .call(d3.axisLeft(y));
+
+    // Another scale for subgroup position?
+    const xSubgroup = d3.scaleBand()
+        .domain(subgroups)
+        .range([0, x.bandwidth()])
+        .padding([0.05])
+
+    // color palette = one color per subgroup
+    const color = d3.scaleOrdinal()
+        .domain(subgroups)
+        .range(['#e41a1c','#377eb8'])
+
+    // Show the bars
+    svg5.append("g")
+        .selectAll("g")
+        // Enter in data = loop group per group
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("transform", function(d) { return "translate(" + x(d.country) + ",0)"; })
+        .selectAll("rect")
+        .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
+        .enter().append("rect")
+        .attr("x", function(d) { return xSubgroup(d.key); })
+        .attr("y", function(d) { return y(d.value); })
+        .attr("width", xSubgroup.bandwidth())
+        .attr("height", function(d) { return height4 - y(d.value); })
+        .attr("fill", function(d) { return color(d.key); });
+
+})
+
+
+// Scatterplot:
+d3.csv("data/updated_data.csv").then(function(data) {
+
+    {
+       const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
+       const width3 = 1000; //- margin3.left - margin.right;
+       const height3 = 600; //- margin.top - margin.bottom;
+
+// Append svg object to the body of the page to house the scatterplot
+
+        const svg4 = d3.select("#scatterplot")
+            .append("svg")
+            .attr("width", width3 - margin3.left - margin3.right)
+            .attr("height", height3 - margin3.top - margin3.bottom)
+            .attr("viewBox", [0, 0, width3 + 20, height3 + 20]);
+
+        let xKey1 = "coastal_population";
+        let yKey1 = "waste_generation_rate(kg/person/day)";
+
+ /*
+        // Find max x
+        let maxX3 = d3.max(data, function(d) { return d[xKey1]; });
+
+        // Create X scale
+        let x3 = d3.scaleLinear()
+            .domain([0, maxX3])
+            .range([margin3.left, width3 - margin3.right]);
+
+        // Find max y
+        let maxY3 = d3.max(data, function (d) { return d[yKey1]; });
+
+        // Create Y scale
+        let y3 = d3.scaleLinear()
+            .domain([0, maxY3])
+            .range([height3 - margin3.bottom, margin3.top]);
+
+
+        // Add x axis
+        svg4.append("g")
+            .attr("transform", "translate(0," + height3 + ")")
+            .call(d3.axisBottom(x3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("x", width3 - margin3.right)
+                .attr("y", margin3.bottom -4 )
+                .attr("fill", "black")
+                .attr("text-anchor", "middle")
+                .text("Coastal Population")
+    );
+
+        // Add y axis
+        svg4.append("g")
+            .call(d3.axisLeft(y3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", 0)
+                .attr("y", margin3.top -4)
+                .attr("fill", "black")
+                .attr("text-anchor", "middle")
+                .text("Waste Generation (kg/person/day)")
+            );
+
+*/
+
+
+        // Find max x
+        let maxX1 = d3.max(data, (d) => { return d[xKey1]; });
+
+        // Create X scale
+        x3 = d3.scaleLinear()
+            .domain([0, maxX1])
+            .range([margin3.left, width3 - margin3.right]);
+
+        // Add x axis
+        svg4.append("g")
+            .attr("transform", `translate(0,${height3 - margin3.bottom})`)
+            .call(d3.axisBottom(x3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("x", width3/ 2)
+                .attr("y", margin3.bottom - 4)
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text("Coastal Population" )
+            );
+
+        // Find max y
+        let maxY1 = d3.max(data, (d) => { return d[yKey1];});
+
+        // Create Y scale
+        y3 = d3.scaleLinear()
+            .domain([0, maxY1])
+            .range([height3 - margin3.bottom, margin3.top]);
+
+        // Add y axis
+        svg4.append("g")
+            .attr("transform", `translate(${margin3.left}, 0)`)
+            .call(d3.axisLeft(y3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("x", -(height3/3))
+                .attr("transform", `rotate(-90)`)
+                .attr("y", margin3.top - 100)
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text("Waste Generation (kg/person/day)")
+            );
+
+        svg4.selectAll(".point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", (d) => x3(d[xKey1]))
+            .attr("cy", (d) => y3(d[yKey1]))
+            .attr("r", 8)
+            .style("opacity", 0.5);
+    }
+});
