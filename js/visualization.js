@@ -155,200 +155,266 @@ d3.csv("data/updated_data.csv").then((data) => {
 
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
+    /*
 
     // DOUBLE BAR GRAPH CODE STARTS HERE...
-    // SOURCE: https://bl.ocks.org/LyssenkoAlex/21df1ce37906bdb614bbf4159618699d
-
+    // SOURCE: https://bl.ocks.org/LyssenkoAlex/21df1ce37906bdb614bbf4159618699
     // hardcoded data for barchart
     const bar_data = [
-        {
-            key: 'North America', values:
-                [
-                    {grpName: '2010', grpValue: 30},
-                    {grpName: '2025', grpValue: 50}
-                ]
-        },
-        {
-            key: 'South America', values:
-                [
-                    {grpName: '2010', grpValue: 20},
-                    {grpName: '2025', grpValue: 25}
-                ]
-        },
-        {
-            key: 'Africa', values:
-                [
-                    {grpName: '2010', grpValue: 15},
-                    {grpName: '2025', grpValue: 20}
-                ]
-        },
-        {
-            key: 'Asia', values:
-                [
-                    {grpName: '2010', grpValue: 40},
-                    {grpName: '2025', grpValue: 55}
-                ]
-        },
-        {
-            key: 'Europe', values:
-                [
-                    {grpName: '2010', grpValue: 30},
-                    {grpName: '2025', grpValue: 45}
-                ]
-        },
-        {
-            key: 'Australia', values:
-                [
-                    {grpName: '2010', grpValue: 20},
-                    {grpName: '2025', grpValue: 30}
-                ]
-        },
+                     { key: 'North America', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:30},
+                                                    {grpName:'2025', grpValue:50}
+                                                  ]
+                     },
+                     { key: 'South America', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:20},
+                                                    {grpName:'2025', grpValue:25}
+                                                  ]
+                     },
+                     { key: 'Africa', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:15},
+                                                    {grpName:'2025', grpValue:20}
+                                                  ]
+                     },
+                     { key: 'Asia', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:40},
+                                                    {grpName:'2025', grpValue:55}
+                                                  ]
+                     },
+                     { key: 'Europe', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:30},
+                                                    {grpName:'2025', grpValue:45}
+                                                  ]
+                     },
+                     { key: 'Australia', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:20},
+                                                    {grpName:'2025', grpValue:30}
+                                                  ]
+                     },
 
-        {
-            key: 'Antartica', values:
-                [
-                    {grpName: '2010', grpValue: 5},
-                    {grpName: '2025', grpValue: 10},
-                ]
-        }
-    ];
+                     { key: 'Antartica', values:
+                                                  [
+                                                    {grpName:'2010', grpValue:5},
+                                                    {grpName:'2025', grpValue:10},
+                                                  ]
+                     }
+                      ];
 
-    // set dimensions and margins of graph
-    let margin = {top: 20, right: 20, bottom: 30, left: 40},
+        // set dimensions and margins of graph
+        let margin = {top: 20, right: 20, bottom: 30, left: 40},
         width = 800 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
-    // append svg object to the body of the page to house bar chart
-    const svg3 = d3.select("#bar")
+        // append svg object to the body of the page to house bar chart
+        const svg3 = d3.select("#bar")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        /*
+           Axes
+         */
     /*
-       Axes
+
+       // create x scale
+       let x0  = d3.scaleBand().rangeRound([0, width], 0.).padding(0.2);
+       let x1  = d3.scaleBand();
+       let xAxis = d3.axisBottom().scale(x0)
+                                   .tickValues(bar_data.map(d=>d.key));
+
+       // create y scale
+       let y   = d3.scaleLinear().rangeRound([height, 0]);
+       let yAxis = d3.axisLeft().scale(y);
+
+       // color palette, each subgroup has a distinct color
+       const color = d3.scaleOrdinal()
+       .range(['#f4a582','#92c5de'])
+
+       // continent names and mismanaged plastic waste values
+       let continent = bar_data.map(function(d) { return d.key; });
+       let mismanaged_plastic = bar_data[0].values.map(function(d) { return d.grpName; });
+
+       x0.domain(continent);
+       x1.domain(mismanaged_plastic).rangeRound([0, x0.bandwidth()]);
+       y.domain([0, d3.max(bar_data, function(key) { return d3.max(key.values, function(d) { return d.grpValue; }); })]);
+
+       // add x axis
+       svg3.append("g")
+         .attr("class", "x axis")
+         .attr("transform", "translate(0," + height + ")")
+         .call(xAxis)
+         .call((g) => g.append("text")
+                 .attr("x", (width - margin.right)/2)
+                 .attr("y", margin.bottom)
+                 .attr("fill", "black")
+                 .attr("text-anchor", "end")
+                 .text("Continent"));
+
+       // add y axis
+       svg3.append("g")
+         .attr("class", "y axis")
+         .call(yAxis)
+         .call((g) => g.append("text")
+                       .attr("transform", "rotate(-90)")
+                       .attr("dy", ".71em")
+                       .attr("x", 0)
+                       .attr("y", margin.top - 15)
+                       .attr("fill", "black")
+                       .attr("text-anchor", "end")
+                       .text("Mismanaged plastic waste (tonnes)"));
+
+       // Add bars to graph
+       let slice = svg3.selectAll(".slice")
+         .data(bar_data)
+         .enter().append("g")
+         .attr("class", "g")
+         .attr("transform",function(d) { return "translate(" + x0(d.key) + ",0)"; });
+
+         // create bars
+         slice.selectAll("rect")
+         .data(function(d) { return d.values; })
+           .enter().append("rect")
+               .attr("width", x1.bandwidth())
+               .attr("x", function(d) { return x1(d.grpName); })
+                .style("fill", function(d) { return color(d.grpName) })
+                .attr("y", function(d) { return y(d.grpValue); })
+                .attr("height", function(d) { return height - y(d.grpValue); })
+     /*
+        Legend
      */
 
-    // create x scale
-    let x0 = d3.scaleBand().rangeRound([0, width], 0.).padding(0.2);
-    let x1 = d3.scaleBand();
-    let xAxis = d3.axisBottom().scale(x0)
-        .tickValues(bar_data.map(d => d.key));
-
-    // create y scale
-    let y = d3.scaleLinear().rangeRound([height, 0]);
-    let yAxis = d3.axisLeft().scale(y);
-
-    // color palette, each subgroup has a distinct color
-    const color = d3.scaleOrdinal()
-        .range(['#f4a582', '#92c5de'])
-
-    // continent names and mismanaged plastic waste values
-    let continent = bar_data.map(function (d) {
-        return d.key;
-    });
-    let mismanaged_plastic = bar_data[0].values.map(function (d) {
-        return d.grpName;
-    });
-
-    x0.domain(continent);
-    x1.domain(mismanaged_plastic).rangeRound([0, x0.bandwidth()]);
-    y.domain([0, d3.max(bar_data, function (key) {
-        return d3.max(key.values, function (d) {
-            return d.grpValue;
-        });
-    })]);
-
-    // add x axis
-    svg3.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-        .call((g) => g.append("text")
-            .attr("x", (width - margin.right) / 2)
-            .attr("y", margin.bottom)
-            .attr("fill", "black")
-            .attr("text-anchor", "end")
-            .text("Continent"));
-
-    // add y axis
-    svg3.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .call((g) => g.append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("dy", ".71em")
-            .attr("x", 0)
-            .attr("y", margin.top - 15)
-            .attr("fill", "black")
-            .attr("text-anchor", "end")
-            .text("Mismanaged plastic waste (tonnes)"));
-
-    // Add bars to graph
-    let slice = svg3.selectAll(".slice")
-        .data(bar_data)
-        .enter().append("g")
-        .attr("class", "g")
-        .attr("transform", function (d) {
-            return "translate(" + x0(d.key) + ",0)";
-        });
-
-    // create bars
-    slice.selectAll("rect")
-        .data(function (d) {
-            return d.values;
-        })
-        .enter().append("rect")
-        .attr("width", x1.bandwidth())
-        .attr("x", function (d) {
-            return x1(d.grpName);
-        })
-        .style("fill", function (d) {
-            return color(d.grpName)
-        })
-        .attr("y", function (d) {
-            return y(d.grpValue);
-        })
-        .attr("height", function (d) {
-            return height - y(d.grpValue);
-        })
-
     /*
-       Legend
+      // Add legend to graph
+      let legend = svg3.selectAll(".legend")
+          .data(bar_data[0].values.map(function(d) { return d.grpName; }).reverse())
+      .enter().append("g")
+          .attr("class", "legend")
+          .attr("transform", function(d,i) { return "translate(0," + i * 20 + ")"; })
+
+      // create squares for legend
+      legend.append("rect")
+          .attr("x", width - 18)
+          .attr("width", 18)
+          .attr("height", 18)
+          .style("fill", function(d) { return color(d); });
+
+      // create text for legend
+      legend.append("text")
+          .attr("x", width - 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "end")
+          .text(function(d) {return d; });
+
     */
 
-    // Add legend to graph
-    let legend = svg3.selectAll(".legend")
-        .data(bar_data[0].values.map(function (d) {
-            return d.grpName;
-        }).reverse())
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function (d, i) {
-            return "translate(0," + i * 20 + ")";
-        })
+// set the dimensions and margins of the graph
+    var margin4 = {top: 10, right: 30, bottom: 20, left: 50},
+        width4 = 800 - margin4.left - margin4.right,
+        height4= 800 - margin4.top - margin4.bottom;
 
-    // create squares for legend
-    legend.append("rect")
-        .attr("x", width - 18)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", function (d) {
-            return color(d);
-        });
+// append the svg object to the body of the page
 
+    var svg5 = d3.select("#bar")
+        .append("svg")
+        .attr("width", width4 + margin4.left + margin4.right)
+        .attr("height", height4 + margin4.top + margin4.bottom)
+        .append("g");
+    //.attr("transform",`translate(${margin4.left},${margin4.top})`);
 
-    // create text for legend
-    legend.append("text")
-        .attr("x", width - 24)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "end")
-        .text(function (d) {
-            return d;
-        });
+// Parse the Data
+    d3.csv("data/updated_data.csv").then(function(data) {
 
+        // Another scale for subgroup position?
+        const xSubgroup = d3.scaleBand()
+            .rangeRound([(margin4.left - 22), width4])
+            .paddingInner(0.1);
+
+        //X Scale for spacing each group's bar
+        let x1 = d3.scaleBand()
+            .padding(0.05);
+
+        // color palette = one color per subgroup
+        const color = d3.scaleOrdinal()
+            .range(['#e41a1c','#377eb8'])
+
+        let continent2010averages = d3
+            .rollups( data,
+                (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2010(tonnes)']),
+                (d) => d.continent
+            )
+            .map(([k, v]) => ({ continent: k, 'wastein2010': v }));
+
+        console.log(continent2010averages);
+
+        let continent2025averages = d3
+            .rollups( data,
+                (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2025(tonnes)']),
+                (d) => d.continent
+            )
+            .map(([k, v]) => ({ continent: k, 'wastein2025': v }));
+
+        console.log(continent2025averages)
+        console.log(continent2025averages.wastein2025)
+
+        //define keys
+        let keys = ["mismanaged_plastic_waste_in_2010(tonnes)","mismanaged_plastic_waste_in_2025(tonnes)"];
+
+        // List of groups = each country
+        const groups = ["Europe", "Africa", "North America", "South America","Oceania", "Asia", ]
+        console.log(groups)
+
+        // Add X axis
+        const x = d3.scaleBand()
+            .domain(groups)
+            .range([0, width4])
+            .padding([0.2])
+        svg.append("g")
+            .attr("transform", "translate(0," + height4 + ")")
+            .call(d3.axisBottom(x).tickSize(0));
+
+        // Add Y axis
+        const y = d3.scaleLinear()
+            .domain([0, 40])
+            .range([ height4, 0 ]);
+        svg5.append("g")
+            .call(d3.axisLeft(y))
+            .call((g) => g.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("dy", ".71em")
+                .attr("x", 0)
+                .attr("y", margin4.top - 15)
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text("Mismanaged plastic waste (tonnes)"));
+
+        // Show the bars
+        svg5.append("g")
+            .selectAll("g")
+            // Enter in data = loop group per group
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("transform", function(d) { return "translate(" + x(d.continent) + ",0)"; })
+            .selectAll("rect")
+            .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+            .enter().append("rect")
+            .attr("x", function(d) { return xSubgroup(d.key); })
+            .attr("y", function(d) { return y(d.value); })
+            .attr("width", xSubgroup.bandwidth())
+            .attr("height", function(d) { return height4 - y(d.value); })
+            .attr("fill", function(d) { return color(d.key); });
+
+    })
+    
 // -----------  Scatterplot:-------------
 
     {
