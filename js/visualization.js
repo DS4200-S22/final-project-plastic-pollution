@@ -346,75 +346,162 @@ d3.csv("data/updated_data.csv").then((data) => {
         const color = d3.scaleOrdinal()
             .range(['#e41a1c','#377eb8'])
 
-        let continent2010averages = d3
+        let continent2010sums = d3
             .rollups( data,
-                (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2010(tonnes)']),
+                (xs) => d3.sum(xs, (x) => x['mismanaged_plastic_waste_in_2010(tonnes)']),
                 (d) => d.continent
             )
             .map(([k, v]) => ({ continent: k, 'wastein2010': v }));
 
-        console.log(continent2010averages);
 
-        let continent2025averages = d3
+        let continent2025sum = d3
             .rollups( data,
-                (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2025(tonnes)']),
+                (xs) => d3.sum(xs, (x) => x['mismanaged_plastic_waste_in_2025(tonnes)']),
                 (d) => d.continent
             )
             .map(([k, v]) => ({ continent: k, 'wastein2025': v }));
 
-        console.log(continent2025averages)
-        console.log(continent2025averages.wastein2025)
+        let merged = [];
 
-        //define keys
-        let keys = ["mismanaged_plastic_waste_in_2010(tonnes)","mismanaged_plastic_waste_in_2025(tonnes)"];
+        for(let i=0; i<continent2010sums.length; i++) {
+          merged.push({
+           ...continent2010sums[i], 
+           ...continent2025sum[i]
+          });
+        }
 
-        // List of groups = each country
-        const groups = ["Europe", "Africa", "North America", "South America","Oceania", "Asia", ]
-        console.log(groups)
+        console.log(merged);
 
-        // Add X axis
-        const x = d3.scaleBand()
-            .domain(groups)
-            .range([0, width4])
-            .padding([0.2])
-        svg.append("g")
-            .attr("transform", "translate(0," + height4 + ")")
-            .call(d3.axisBottom(x).tickSize(0));
+              // set dimensions and margins of graph
+        let margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-        // Add Y axis
-        const y = d3.scaleLinear()
-            .domain([0, 40])
-            .range([ height4, 0 ]);
-        svg5.append("g")
-            .call(d3.axisLeft(y))
-            .call((g) => g.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("dy", ".71em")
-                .attr("x", 0)
-                .attr("y", margin4.top - 15)
-                .attr("fill", "black")
-                .attr("text-anchor", "end")
-                .text("Mismanaged plastic waste (tonnes)"));
+        // append svg object to the body of the page to house bar chart
+        const svg3 = d3.select("#bar")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        // Show the bars
-        svg5.append("g")
-            .selectAll("g")
-            // Enter in data = loop group per group
-            .data(data)
-            .enter()
-            .append("g")
-            .attr("transform", function(d) { return "translate(" + x(d.continent) + ",0)"; })
-            .selectAll("rect")
-            .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
-            .enter().append("rect")
-            .attr("x", function(d) { return xSubgroup(d.key); })
-            .attr("y", function(d) { return y(d.value); })
-            .attr("width", xSubgroup.bandwidth())
-            .attr("height", function(d) { return height4 - y(d.value); })
-            .attr("fill", function(d) { return color(d.key); });
-
-    })
+        /*
+           Axes
+         */
     
+
+         // create x scale
+         let x0  = d3.scaleBand().rangeRound([0, width], 0.).padding(0.2);
+         let x1  = d3.scaleBand();
+         let xAxis = d3.axisBottom().scale(x0)
+                                     .tickValues(merged.map(d=>d.key));
+
+         // create y scale
+         let y   = d3.scaleLinear().rangeRound([height, 0]);
+         let yAxis = d3.axisLeft().scale(y);
+
+         // color palette, each subgroup has a distinct color
+         const color = d3.scaleOrdinal()
+         .range(['#f4a582','#92c5de'])
+
+         // continent names and mismanaged plastic waste values
+         let continent = merged.map(function(d) { return d.key; });
+         let mismanaged_plastic = merged[0].values.map(function(d) { return d.wastein2010; });
+
+         x0.domain(continent);
+         x1.domain(mismanaged_plastic).rangeRound([0, x0.bandwidth()]);
+         y.domain([0, d3.max(merged, function(key) { return d3.max(key.values, function(d) { return d.wastein2025; }); })]);
+
+         // add x axis
+         svg3.append("g")
+           .attr("class", "x axis")
+           .attr("transform", "translate(0," + height + ")")
+           .call(xAxis)
+           .call((g) => g.append("text")
+                   .attr("x", (width - margin.right)/2)
+                   .attr("y", margin.bottom)
+                   .attr("fill", "black")
+                   .attr("text-anchor", "end")
+                   .text("Continent"));
+
+         // add y axis
+         svg3.append("g")
+           .attr("class", "y axis")
+           .call(yAxis)
+           .call((g) => g.append("text")
+                         .attr("transform", "rotate(-90)")
+                         .attr("dy", ".71em")
+                         .attr("x", 0)
+                         .attr("y", margin.top - 15)
+                         .attr("fill", "black")
+                         .attr("text-anchor", "end")
+                         .text("Mismanaged plastic waste (tonnes)"));
+
+         // Add bars to graph
+         let slice = svg3.selectAll(".slice")
+           .data(merged)
+           .enter().append("g")
+           .attr("class", "g")
+           .attr("transform",function(d) { return "translate(" + x0(d.key) + ",0)"; });
+
+           // create bars
+           slice.selectAll("rect")
+           .data(function(d) { return d.values; })
+             .enter().append("rect")
+                 .attr("width", x1.bandwidth())
+                 .attr("x", function(d) { return x1(d.wastein2010); })
+                  .style("fill", function(d) { return color(d.wastein2010) })
+                  .attr("y", function(d) { return y(d.wastein2025); })
+                  .attr("height", function(d) { return height - y(d.wastein2025); })
+
+          let keys = ["mismanaged_plastic_waste_in_2010(tonnes)","mismanaged_plastic_waste_in_2025(tonnes)"];
+
+          // List of groups = each country
+          const groups = ["Europe", "Africa", "North America", "South America","Oceania", "Asia", ]
+          
+          // Add X axis
+          const x = d3.scaleBand()
+              .domain(groups)
+              .range([0, width4])
+              .padding([0.2])
+          svg.append("g")
+              .attr("transform", "translate(0," + height4 + ")")
+              .call(d3.axisBottom(x).tickSize(0));
+
+          // Add Y axis
+          const y = d3.scaleLinear()
+              .domain([0, 40])
+              .range([ height4, 0 ]);
+          svg5.append("g")
+              .call(d3.axisLeft(y))
+              .call((g) => g.append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("dy", ".71em")
+                  .attr("x", 0)
+                  .attr("y", margin4.top - 15)
+                  .attr("fill", "black")
+                  .attr("text-anchor", "end")
+                  .text("Mismanaged plastic waste (tonnes)"));
+
+          // Show the bars
+          svg5.append("g")
+              .selectAll("g")
+              // Enter in data = loop group per group
+              .data(merged)
+              .enter()
+              .append("g")
+              .attr("transform", function(d) { return "translate(" + x(d.continent) + ",0)"; })
+              .selectAll("rect")
+              .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+              .enter().append("rect")
+              .attr("x", function(d) { return xSubgroup(d.key); })
+              .attr("y", function(d) { return y(d.value); })
+              .attr("width", xSubgroup.bandwidth())
+              .attr("height", function(d) { return height4 - y(d.value); })
+              .attr("fill", function(d) { return color(d.key); });
+
+      // })
+      
 // -----------  Scatterplot:-------------
 
     {
