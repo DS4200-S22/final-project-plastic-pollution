@@ -284,8 +284,8 @@ const bar_data = [
 
 // set the dimensions and margins of the graph
 var margin4 = {top: 10, right: 30, bottom: 20, left: 50},
-    width4 = 1500 - margin4.left - margin4.right,
-    height4= 1500 - margin4.top - margin4.bottom;
+    width4 = 800 - margin4.left - margin4.right,
+    height4= 800 - margin4.top - margin4.bottom;
 
 // append the svg object to the body of the page
 
@@ -297,15 +297,46 @@ var svg5 = d3.select("#bar")
     //.attr("transform",`translate(${margin4.left},${margin4.top})`);
 
 // Parse the Data
-
 d3.csv("data/updated_data.csv").then(function(data) {
 
-    // List of subgroups = header of the csv files = soil condition here
-    const subgroups = data.columns.slice(13, 15)
-console.log(subgroups)
+    // Another scale for subgroup position?
+    const xSubgroup = d3.scaleBand()
+        .rangeRound([(margin4.left - 22), width4])
+        .paddingInner(0.1);
+
+    //X Scale for spacing each group's bar
+    let x1 = d3.scaleBand()
+        .padding(0.05);
+
+    // color palette = one color per subgroup
+    const color = d3.scaleOrdinal()
+        .range(['#e41a1c','#377eb8'])
+
+    let continent2010averages = d3
+        .rollups( data,
+            (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2010(tonnes)']),
+            (d) => d.continent
+        )
+        .map(([k, v]) => ({ continent: k, 'wastein2010': v }));
+
+    console.log(continent2010averages);
+
+    let continent2025averages = d3
+        .rollups( data,
+            (xs) => d3.mean(xs, (x) => x['mismanaged_plastic_waste_in_2025(tonnes)']),
+            (d) => d.continent
+        )
+        .map(([k, v]) => ({ continent: k, 'wastein2025': v }));
+
+    console.log(continent2025averages)
+    console.log(continent2025averages.wastein2025)
+
+    //define keys
+    let keys = ["mismanaged_plastic_waste_in_2010(tonnes)","mismanaged_plastic_waste_in_2025(tonnes)"];
+
     // List of groups = each country
-    const groups = data.map(d => d.country)
-console.log(groups)
+    const groups = ["Europe", "Africa", "North America", "South America","Oceania", "Asia", ]
+    console.log(groups)
 
     // Add X axis
     const x = d3.scaleBand()
@@ -321,18 +352,15 @@ console.log(groups)
         .domain([0, 40])
         .range([ height4, 0 ]);
     svg5.append("g")
-        .call(d3.axisLeft(y));
-
-    // Another scale for subgroup position?
-    const xSubgroup = d3.scaleBand()
-        .domain(subgroups)
-        .range([0, x.bandwidth()])
-        .padding([0.05])
-
-    // color palette = one color per subgroup
-    const color = d3.scaleOrdinal()
-        .domain(subgroups)
-        .range(['#e41a1c','#377eb8'])
+        .call(d3.axisLeft(y))
+        .call((g) => g.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("dy", ".71em")
+            .attr("x", 0)
+            .attr("y", margin4.top - 15)
+            .attr("fill", "black")
+            .attr("text-anchor", "end")
+            .text("Mismanaged plastic waste (tonnes)"));
 
     // Show the bars
     svg5.append("g")
@@ -341,9 +369,9 @@ console.log(groups)
         .data(data)
         .enter()
         .append("g")
-        .attr("transform", function(d) { return "translate(" + x(d.country) + ",0)"; })
+        .attr("transform", function(d) { return "translate(" + x(d.continent) + ",0)"; })
         .selectAll("rect")
-        .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
+        .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
         .enter().append("rect")
         .attr("x", function(d) { return xSubgroup(d.key); })
         .attr("y", function(d) { return y(d.value); })
@@ -354,7 +382,9 @@ console.log(groups)
 })
 
 
-// Scatterplot:
+
+
+// -----------  Scatterplot:-------------
 d3.csv("data/updated_data.csv").then(function(data) {
 
     {
@@ -372,53 +402,6 @@ d3.csv("data/updated_data.csv").then(function(data) {
 
         let xKey1 = "coastal_population";
         let yKey1 = "waste_generation_rate(kg/person/day)";
-
- /*
-        // Find max x
-        let maxX3 = d3.max(data, function(d) { return d[xKey1]; });
-
-        // Create X scale
-        let x3 = d3.scaleLinear()
-            .domain([0, maxX3])
-            .range([margin3.left, width3 - margin3.right]);
-
-        // Find max y
-        let maxY3 = d3.max(data, function (d) { return d[yKey1]; });
-
-        // Create Y scale
-        let y3 = d3.scaleLinear()
-            .domain([0, maxY3])
-            .range([height3 - margin3.bottom, margin3.top]);
-
-
-        // Add x axis
-        svg4.append("g")
-            .attr("transform", "translate(0," + height3 + ")")
-            .call(d3.axisBottom(x3))
-            .attr("font-size", '10px')
-            .call((g) => g.append("text")
-                .attr("x", width3 - margin3.right)
-                .attr("y", margin3.bottom -4 )
-                .attr("fill", "black")
-                .attr("text-anchor", "middle")
-                .text("Coastal Population")
-    );
-
-        // Add y axis
-        svg4.append("g")
-            .call(d3.axisLeft(y3))
-            .attr("font-size", '10px')
-            .call((g) => g.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("x", 0)
-                .attr("y", margin3.top -4)
-                .attr("fill", "black")
-                .attr("text-anchor", "middle")
-                .text("Waste Generation (kg/person/day)")
-            );
-
-*/
-
 
         // Find max x
         let maxX1 = d3.max(data, (d) => { return d[xKey1]; });
