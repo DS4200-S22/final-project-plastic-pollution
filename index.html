@@ -10,6 +10,8 @@
 
   <!-- CSS Styling -->
   <link rel='stylesheet' href='style.css'>
+  <!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js">-->
+
 
 </head>
 
@@ -21,30 +23,30 @@
 
 <!-- Writeup -->
 <div class='content-column'>
-    <h1>Plastic Pollution</h1>
+  <h1>Plastic Pollution</h1>
 
-    <p>
-      <strong>Ashraf Bade</strong>, <strong>Elisabeth Leung</strong>, <strong>Justin Woo</strong>, <strong>Shivi Sood</strong>
-    </p>
+  <p>
+    <strong>Ashraf Bade</strong>, <strong>Elisabeth Leung</strong>, <strong>Justin Woo</strong>, <strong>Shivi Sood</strong>
+  </p>
 
-    <p>Course Project as part of
-    	<a href='https://northeastern.instructure.com/courses/18721'>DS4200 S22: Information Visualization</a>, taught by
-      <a href='https://www.khoury.northeastern.edu/home/amosca/'>Prof. Ab Mosca</a>,
-      <a href='https://visualization.khoury.northeastern.edu/'>Data Visualization @ Khoury</a>,
-      <a href='https://www.khoury.northeastern.edu/'>Northeastern University</a>.
-    </p>
+  <p>Course Project as part of
+    <a href='https://northeastern.instructure.com/courses/18721'>DS4200 S22: Information Visualization</a>, taught by
+    <a href='https://www.khoury.northeastern.edu/home/amosca/'>Prof. Ab Mosca</a>,
+    <a href='https://visualization.khoury.northeastern.edu/'>Data Visualization @ Khoury</a>,
+    <a href='https://www.khoury.northeastern.edu/'>Northeastern University</a>.
+  </p>
 
 
-    <h1>Abstract</h1>
+  <h1>Abstract</h1>
 
-    <p>
-      Plastic pollution is a prevalent issue in today’s world as it has detrimental effects on the environment and marine life.
-      We propose a visualization that would allow one to see the consumption of plastic by each country and continent as a whole.
-      This visualization tool would fill a gap between not visually seeing what areas in the world are the most responsible for plastic pollution.
-      It would help the average person be more aware of their habits when it comes to the disposal of plastic waste.
-      Policymakers would benefit from seeing what proportion of plastic waste is insufficiently disposed of and littered worldwide.
-      They can put the necessary regulations and policies worldwide to combat this issue.
-    </p>
+  <p>
+    Plastic pollution is a prevalent issue in today’s world as it has detrimental effects on the environment and marine life.
+    We propose a visualization that would allow one to see the consumption of plastic by each country and continent as a whole.
+    This visualization tool would fill a gap between not visually seeing what areas in the world are the most responsible for plastic pollution.
+    It would help the average person be more aware of their habits when it comes to the disposal of plastic waste.
+    Policymakers would benefit from seeing what proportion of plastic waste is insufficiently disposed of and littered worldwide.
+    They can put the necessary regulations and policies worldwide to combat this issue.
+  </p>
 </div>
 
 
@@ -52,7 +54,7 @@
 <h1>Visualization</h1>
 
 <div id="map" class='vis-holder' >
-
+  <svg id="my_dataviz" width="1600" height="600"></svg>
 </div>
 
 <div id="pie" class='vis-holder' >
@@ -82,7 +84,7 @@
   <video controls width='100%'>
     <source src='http://www.ccs.neu.edu/home/cody/courses/shared/d3-flexible-transitions.mp4' type='video/mp4'>
     <p>Your browser doesn't support HTML5 video. Here is
-     a <a href='http://www.ccs.neu.edu/home/cody/courses/shared/d3-flexible-transitions.mp4'>link to the video</a> instead.</p>
+      a <a href='http://www.ccs.neu.edu/home/cody/courses/shared/d3-flexible-transitions.mp4'>link to the video</a> instead.</p>
   </video>
 
   <h1>Visualization Explanation</h1>
@@ -113,8 +115,11 @@
   </ul>
 </div>
 
-  <!-- Scripts at the end avoid need for dealing with async, defer, or onload event handlers -->
-  <script src='lib/d3.v6.1.1/d3.min.js'></script>
-  <script src='js/visualization.js'></script>
+<!-- Scripts at the end avoid need for dealing with async, defer, or onload event handlers -->
+<script src='lib/d3.v6.1.1/d3.min.js'></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+<script src='js/visualization.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.js" integrity="sha512-5mCB0Kvv97yTzqo0174qxPjMisck/WlK51+mw/RV7UfYbtHI8LuLR82BzZuxHUKSfbh75u9cZHgUcqrZDaBJuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </body>
 </html>
