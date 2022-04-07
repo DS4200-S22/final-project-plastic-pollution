@@ -1,5 +1,5 @@
 // Read in data and print to console
-d3.csv("data/updated_data.csv").then((data) => {console.log(data)})
+d3.csv("data/updated_data.csv").then((data) => {
 
 // WORLD MAP CODE STARTS HERE...
 // SOURCE1: https://d3-graph-gallery.com/graph/choropleth_hover_effect.html
@@ -432,6 +432,8 @@ legend.append("text")
         .append("g");
     //.attr("transform",`translate(${margin4.left},${margin4.top})`);
 
+
+/*
 // Parse the Data
 
         // Another scale for subgroup position?
@@ -529,7 +531,10 @@ legend.append("text")
               //.attr("height", function(d) { return height4 - y(d.value); })
               .attr("fill", function(d) { return color(d.key); });
 
-      
+
+
+ */
+
 // -----------Scatterplot:-------------
 
 
@@ -603,3 +608,5 @@ legend.append("text")
             .attr("cy", (d) => y3(d[yKey1]))
             .attr("r", 8)
             .style("opacity", 0.5);
+
+})
