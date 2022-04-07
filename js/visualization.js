@@ -599,14 +599,45 @@ legend.append("text")
                 .attr("text-anchor", "end")
                 .text("Waste Generation (kg/person/day)")
             );
+    //Tooltip Set-up
+    const yTooltipOffset = 15;
 
-        svg4.selectAll(".point")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", (d) => x3(d[xKey1]))
-            .attr("cy", (d) => y3(d[yKey1]))
-            .attr("r", 8)
-            .style("opacity", 0.5);
 
-})
+    // Add div for tooltip to webpage
+    const tooltip = d3.select("#scatterplot")
+        .append("div")
+        .attr('id', "tooltip")
+        .style("opacity", 0)
+        .attr("class", "tooltip");
+
+    // Add values to tooltip on mouseover, make tooltip div opaque
+    const mouseover = function(event, d) {
+        tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+            .style("opacity", 1);
+    }
+
+    // Position tooltip to follow mouse
+    const mousemove = function(event, d) {
+        tooltip.style("left", (event.pageX) + "px")
+            .style("top", (event.pageY + yTooltipOffset) + "px");
+    }
+
+    // Return tooltip to transparent when mouse leaves
+    const mouseleave = function(event, d) {
+        tooltip.style("opacity", 0);
+    }
+
+    svg4.selectAll(".point")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => x3(d[xKey1]))
+        .attr("cy", (d) => y3(d[yKey1]))
+        .attr("r", 8)
+        .style("opacity", 0.5)
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
+    svg4.append(tooltip);
+    
+});
