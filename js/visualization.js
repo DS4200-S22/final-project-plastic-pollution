@@ -310,4 +310,186 @@ d3.csv("data/updated_data.csv").then((data) => {
           .attr("dy", ".35em")
           .style("text-anchor", "end")
           .text(function(d) {return d; });
+<<<<<<< Updated upstream
 })
+=======
+
+    */
+
+      let continent2010sums = d3
+           .rollups( data,
+              (xs) => d3.sum(xs, (x) => x['mismanaged_plastic_waste_in_2010(tonnes)']),
+              (d) => d.continent
+            )
+          .map(([k, v]) => ({ continent: k, 'wastein2010': v }));
+
+
+      let continent2025sum = d3
+          .rollups( data,
+              (xs) => d3.sum(xs, (x) => x['mismanaged_plastic_waste_in_2025(tonnes)']),
+              (d) => d.continent
+            )
+          .map(([k, v]) => ({ continent: k, 'wastein2025': v }));
+
+      let merged = [];
+
+      for(let i=0; i<continent2010sums.length; i++) {
+      merged.push({
+           ...continent2010sums[i], 
+           ...continent2025sum[i]
+          });
+        }
+
+      console.log(merged);
+
+      let colorRange = d3.scaleOrdinal().range(["#00BCD4", "#FFC400"]);
+      let subGroupKeys = ["wastein2010", "wastein2025"];
+
+      let svg3 = d3.select("#bar")
+        .append("svg")
+        .attr("width", chart.width)
+        .attr("height", chart.height)
+        .append("g")
+        .attr("transform", "translate(" + chart.width / 2 + "," + chart.height / 2 + ")");
+;
+      let margin = {top: 20, right: 20, bottom: 30, left: 40};
+      let width = +svg3.attr("width") - margin.left - margin.right;
+      let height = +svg3.attr("height") - margin.top - margin.bottom;
+      let container = svg3.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      // The scale spacing the groups, your "sectors":
+      let x0 = d3.scaleBand()
+              .domain(merged.map(d => d.continent))
+          .rangeRound([0, width])
+          .paddingInner(0.1);
+
+      // The scale for spacing each group's bar, your "sector bar":
+      let x1 = d3.scaleBand()
+              .domain(subGroupKeys)
+          .rangeRound([0, x0.bandwidth()])
+          .padding(0.05);
+      let xAxis = d3.axisBottom().scale(x0)
+          .tickValues(merged.map(d=>d.continent))
+      let yScale = d3.scaleLinear()
+        .domain([0, 100])
+        .rangeRound([height, 0]);
+      let yAxis = d3.axisLeft().scale(yScale);
+      //and then you will need to append both, groups and bars
+      let groups = container.append('g')
+        .selectAll('g')
+        .data(merged, d => d.continent)
+        .join("g")
+        .attr("transform", (d) => "translate(" + x0(d.continent) + ",0)");
+
+      //define groups bars, one per sub group 
+      let bars = groups
+        .selectAll("rect")
+        .data(d => subGroupKeys.map(key => ({ key, value: d[key], continent: d.continent })), (d) => "" + d.continent + "_" + d.key)
+        .join("rect")
+        .attr("fill", d => colorRange(d.key))
+        .attr("x", d => x1(d.key))
+        .attr("width", (d) => x1.bandwidth())
+        .attr('y', (d) => Math.min(yScale(0), yScale(d.value)))
+        .attr('height', (d) => Math.abs(yScale(0) - yScale(d.value)));
+
+      // add x axis
+       svg3.append("g")
+         .attr("class", "x axis")
+         .attr("transform", "translate(0," + height + ")")
+         .call(xAxis)
+         .call((g) => g.append("text")
+                 .attr("x", (width - margin.right)/2)
+                 .attr("y", margin.bottom)
+                 .attr("fill", "black")
+                 .attr("text-anchor", "end")
+                 .text("Continent"));
+
+      // add y axis
+       svg3.append("g")
+         .attr("class", "y axis")
+         .call(yAxis)
+         .call((g) => g.append("text")
+                       .attr("transform", "rotate(-90)")
+                       .attr("dy", ".71em")
+                       .attr("x", 0)
+                       .attr("y", margin.top - 15)
+                       .attr("fill", "black")
+                       .attr("text-anchor", "end")
+                       .text("Mismanaged plastic waste (tonnes)"));
+            
+// -----------Scatterplot:-------------
+
+    {
+        const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
+        const width3 = 1000; //- margin3.left - margin.right;
+        const height3 = 600; //- margin.top - margin.bottom;
+
+// Append svg object to the body of the page to house the scatterplot
+
+        const svg4 = d3.select("#scatterplot")
+            .append("svg")
+            .attr("width", width3 - margin3.left - margin3.right)
+            .attr("height", height3 - margin3.top - margin3.bottom)
+            .attr("viewBox", [0, 0, width3 + 20, height3 + 20]);
+
+        let xKey1 = "coastal_population";
+        let yKey1 = "waste_generation_rate(kg/person/day)";
+
+        // Find max x
+        let maxX1 = d3.max(data, (d) => {
+            return d[xKey1];
+        });
+
+        // Create X scale
+        x3 = d3.scaleLinear()
+            .domain([0, maxX1])
+            .range([margin3.left, width3 - margin3.right]);
+
+        // Add x axis
+        svg4.append("g")
+            .attr("transform", `translate(0,${height3 - margin3.bottom})`)
+            .call(d3.axisBottom(x3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("x", width3 / 2)
+                .attr("y", margin3.bottom - 4)
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text("Coastal Population")
+            );
+
+        // Find max y
+        let maxY1 = d3.max(data, (d) => {
+            return d[yKey1];
+        });
+
+        // Create Y scale
+        y3 = d3.scaleLinear()
+            .domain([0, maxY1])
+            .range([height3 - margin3.bottom, margin3.top]);
+
+        // Add y axis
+        svg4.append("g")
+            .attr("transform", `translate(${margin3.left}, 0)`)
+            .call(d3.axisLeft(y3))
+            .attr("font-size", '10px')
+            .call((g) => g.append("text")
+                .attr("x", -(height3 / 3))
+                .attr("transform", `rotate(-90)`)
+                .attr("y", margin3.top - 100)
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text("Waste Generation (kg/person/day)")
+            );
+
+        svg4.selectAll(".point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", (d) => x3(d[xKey1]))
+            .attr("cy", (d) => y3(d[yKey1]))
+            .attr("r", 8)
+            .style("opacity", 0.5);
+    }
+})
+
+>>>>>>> Stashed changes
