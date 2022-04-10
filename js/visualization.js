@@ -245,13 +245,113 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
+    // -- Grouped Bar Chart --
+    let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
+        widthBar = 500,
+        heightBar = 500;
+
+    let groupsBar = data.map(d => d.continent);
+
+    let subGroupBar = ['mismanaged_plastic_waste_in_2010(tonnes)', 'mismanaged_plastic_waste_in_2025(tonnes)'];
+
+    let svg3 = d3.select("#bar")
+        .append("svg")
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .attr('width', '100%')
+        .attr('height', heightBar + marginBar.top + marginBar.bottom)
+        .attr('viewBox', [0, 0, widthBar + marginBar.left + marginBar.right, heightBar + marginBar.top + marginBar.bottom].join(' '))
+        .append('g')
+        .attr('transform', 'translate(' + marginBar.left + ',' + marginBar.top + ')');
+
+    // add x axis
+    let xAxisBar = d3.scaleBand()
+        .domain(groupsBar)
+        .range([0, widthBar])
+        .padding([0.2])
+    svg3.append('g')
+        .attr('transform', `translate(0, ${heightBar})`)
+        .call(d3.axisBottom(xAxisBar).tickSize(0));
+
+    // add x axis label
+    svg3.append('text')
+        .attr('x', widthBar/2 - marginBar.right)
+        .attr('y', heightBar + marginBar.top * 2)
+        .style('stroke', 'black')
+        .style('font-size', '20px')
+        .text('Continent');
+
+    // add y axis
+    let yAxisBar = d3.scaleLinear()
+        .domain([0, 20000000])
+        .range([ heightBar, 0 ]);
+    svg3.append('g')
+        .call(d3.axisLeft(yAxisBar).ticks(10));
+
+    // add y axis label
+    svg3.append('text')
+        .attr('y', - marginBar.right)
+        .attr('x', -widthBar/2 - marginBar.bottom * 2)
+        .style('stroke', 'black')
+        .attr('transform', 'rotate(-90)')
+        .style('font-size', '20px')
+        .text('Mismanaged Plastic Waste (Tonnes)');
+
+    // scale for medal subgroup
+    let xSubGroupBar = d3.scaleBand()
+        .domain(subGroupBar)
+        .range([0, xAxisBar.bandwidth()])
+        .padding([0.05])
+
+    // color palette for medals
+    let colorBar = d3.scaleOrdinal()
+        .domain(subGroupBar)
+        .range(['salmon','cornflowerblue'])
+
+    // add the bars
+    svg3.append('g')
+        .selectAll('g')
+        .data(data)
+        .join('g')
+        .attr('transform', d => `translate(${xAxisBar(d.continent)}, 0)`)
+        .selectAll('rect')
+        .data(function(d) { return subGroupBar.map(function(key) { return {key: key, value: d[key]}; }); })
+        .join('rect')
+        .attr('x', d => xSubGroupBar(d.key))
+        .attr('y', d => yAxisBar(d.value))
+        .attr('width', xSubGroupBar.bandwidth())
+        .attr('height', d => heightBar - yAxisBar(d.value))
+        .attr('fill', d => colorBar(d.key));
+
+    // add a legend
+    svg3.append('rect')
+        .attr('x', widthBar)
+        .attr('y', marginBar.bottom)
+        .attr('width', 20)
+        .attr('height', 20)
+        .style('stroke', 'black')
+        .style('fill', 'salmon');
+    svg3.append('text')
+        .attr('x', widthBar + 25)
+        .attr('y', marginBar.bottom + 16)
+        .text('2010')
+        .style('font-size', '15px')
+    svg3.append('rect')
+        .attr('x', widthBar)
+        .attr('y', marginBar.bottom + 25)
+        .attr('width', 20)
+        .attr('height', 20)
+        .style('stroke', 'black')
+        .style('fill', 'cornflowerblue');
+    svg3.append('text')
+        .attr('x', widthBar + 25)
+        .attr('y', marginBar.bottom + 41)
+        .text('2025')
+        .style('font-size', '15px')
 
 // set the dimensions and margins of the graph
     let margin4 = {top: 10, right: 30, bottom: 20, left: 50},
         width4 = 800 - margin4.left - margin4.right,
         height4= 800 - margin4.top - margin4.bottom;
-
-
 // -----------Scatterplot:-------------
     const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
     const width3 = 1000; //- margin3.left - margin.right;
