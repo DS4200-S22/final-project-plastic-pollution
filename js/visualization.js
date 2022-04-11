@@ -352,6 +352,9 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
     let margin4 = {top: 10, right: 30, bottom: 20, left: 50},
         width4 = 800 - margin4.left - margin4.right,
         height4= 800 - margin4.top - margin4.bottom;
+
+
+
 // -----------Scatterplot:-------------
     const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
     const width3 = 1000; //- margin3.left - margin.right;
@@ -366,7 +369,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr("viewBox", [0, 0, width3 + 20, height3 + 20]);
 
     let xKey1 = "coastal_population";
-    let yKey1 = "waste_generation_rate(kg/person/day)";
+    let yKey1 = "mismanaged_plastic_waste(kg/person/day)";
 
     // Find max x
     let maxX1 = d3.max(data, (d) => {
@@ -412,7 +415,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .attr("y", margin3.top - 100)
             .attr("fill", "black")
             .attr("text-anchor", "end")
-            .text("Waste Generation (kg/person/day)")
+            .text("Mismanaged Waste (kg/person/day)")
         );
 //Tooltip Set-up
 const yTooltipOffset = 15;
@@ -449,6 +452,7 @@ svg4.selectAll(".point")
     .attr("cx", (d) => x3(d[xKey1]))
     .attr("cy", (d) => y3(d[yKey1]))
     .attr("r", 8)
+    .attr("fill", "blue")
     .style("opacity", 0.5)
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
