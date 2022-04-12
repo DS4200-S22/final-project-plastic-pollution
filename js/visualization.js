@@ -3,29 +3,26 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 // WORLD MAP CODE STARTS HERE...
 // SOURCE1: https://d3-graph-gallery.com/graph/choropleth_hover_effect.html
-// SOURCE2:
 
 // The svg
 let svg = d3.select("svg"),
     width1 = +svg.attr("width"),
     height1 = +svg.attr("height"),
-    margin1 = {top: 20, right: 10, bottom: 40, left: 100};
-
-// const labels = ["< 500000 kg/day", "< 500000 kg/day - < 100000000 kg/day", "> 100000000 kg/day"]
+    margin1 = {top: 50, right: 100, bottom: 50, left: 50};
 
 // Map and projection
 let path = d3.geoPath();
 
 let projection = d3.geoMercator()
-    .scale(120)
-    .center([0, 5])
+    .scale(100)
+    .center([75, 0])
     .translate([width1 / 2, height1 / 2]);
 
 
 // Data and color scale
 let data1 = new Map()
 let colorScale = d3.scaleThreshold()
-    .domain([0, 50, 5000, 50000, 500000, 5000000, 500000000])
+    .domain([0, 500, 50000, 500000, 5000000, 50000000, 500000000])
     .range(d3.schemeBlues[6]);
 
 // Load external data and boot
@@ -35,8 +32,22 @@ promises.push(d3.csv("data/updated_data.csv", function(d) { data1.set(d.code, +d
 
 myDataPromises = Promise.all(promises).then(function(mydata) {
 
+    let topo = mydata[0]
+
+    // tooltip
+    let tooltip1 = d3.select(".vis-holder")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip1")
+        .style("background-color", "skyblue")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("margin-right", "732px")
+
+
     // legend
-    const legend_x = width1 - margin1.left - 120
+    const legend_x = width1 - margin1.left - 200
     const legend_y = height1 - 200
 
     svg.append("g")
@@ -52,38 +63,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
     svg.select(".legendQuant")
         .call(legendLinear)
 
-    // Features of the annotation
-    const annotations = [
-        {
-            note: {
-                label: "Waste Generation 10,055,659 kg/day",
-                title: "Russia",
-                wrap: 150,  // try something smaller to see text split in several lines
-                padding: 10   // More = text lower
-
-            },
-            color: ["#62b6ef"],
-            x: projection([150.916672,-31.083332])[0],
-            y: projection([150.916672,67.083332])[1],
-            dy: -30,
-            dx: 10
-        }
-    ]
-
-    // Add annotation to the chart
-    let makeAnnotations = function(d) {
-
-        let ann = d3.annotation().annotations(annotations)
-
-        svg.append("g")
-            .style("opacity", 1)
-            .attr("id", "annotation")
-            .call(ann)
-
-        console.log("Annotations function hit")
-    }
-
-    let topo = mydata[0]
 
     let mouseOver = function(d, event) {
         d3.selectAll(".Country")
@@ -94,13 +73,16 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .duration(200)
             .style("stroke", "black")
 
-        d3.select(this)
-            .on("click", makeAnnotations)
-
         // tooltip
-        d3.selectAll("#annotation")
-            .style("opacity", 0)
-            .style("opacity", 0.8)
+        tooltip1
+            .style("opacity", 1)
+            .style("visibility", "visible")
+    }
+
+    let mouseMove = function(d, event) {
+        tooltip1
+            .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + event.total + " kg/day")
+            .style("text-align", "center")
     }
 
     let mouseLeave = function(d) {
@@ -114,9 +96,10 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .style("stroke", "transparent")
 
         // tooltip
-        d3.selectAll("#annotation")
-            // .style("opacity", 1)
-            .style("opacity", 0)
+        tooltip1
+            .transition()
+            .duration(200)
+            .style("opacity", 1)
     }
 
     // Draw the map
@@ -141,6 +124,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .style("opacity", .8)
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave)
+        .on("mousemove", mouseMove)
 
 })
     // PIE CHART CODE STARTS HERE
