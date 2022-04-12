@@ -446,7 +446,7 @@ const tooltip = d3.select("#scatterplot")
 
 // Add values to tooltip on mouseover, make tooltip div opaque
 const mouseover = function(event, d) {
-    tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+    tooltip.html("Country: " + d.country + "<br> Waste Generation Rate (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
         .style("opacity", 1);
 }
 
