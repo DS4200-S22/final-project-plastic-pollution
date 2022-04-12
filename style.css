@@ -15,14 +15,28 @@ h1, h2, h3 {
 	margin: 40px auto;
 }
 
-/* Full-width and Full-height */
-#vis-holder {
-	width: 100%;
-	height: 100%;
+.map-title {
+	/*text-align: center;*/
+	text-decoration-line: underline;
+	padding-left: 330px;
 }
 
-.map {
 
+/* Full-width and Full-height */
+/*#vis-holder {*/
+/*	width: 100%;*/
+/*	height: 100%;*/
+/*}*/
+
+.vis-holder {
+	padding-left: 75px;
+	align-items: center;
+}
+
+.my_dataviz {
+	border-style: solid;
+	border-color: black;
+	padding: 25px 50px 25px 50px;
 }
 
 .pie {
