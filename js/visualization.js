@@ -307,6 +307,36 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .domain(subGroupBar)
         .range(['salmon','cornflowerblue'])
 
+//Tooltip Set-up
+const yTooltipOffsetBar = 15;
+
+
+// Add div for tooltip to webpage
+const tooltipBar = d3.select("#bar")
+    .append("div")
+    .attr('id', "tooltip")
+    .style("opacity", 0)
+    .attr("class", "tooltip");
+
+// Add values to tooltip on mouseover, make tooltip div opaque
+const mouseoverbar = function(event, d) {
+    tooltipBar.html(d.key + ": " +d.value)
+        .style("opacity", 1);
+}
+
+// Position tooltip to follow mouse
+const mousemovebar = function(event, d) {
+    tooltipBar.style("left", (event.pageX) + "px")
+        .style("top", (event.pageY + yTooltipOffsetBar) + "px");
+}
+
+// Return tooltip to transparent when mouse leaves
+const mouseleavebar = function(event, d) {
+    tooltipBar.style("opacity", 0);
+}
+
+
+// svg3.append(tooltipBar);
     // add the bars
     svg3.append('g')
         .selectAll('g')
@@ -320,7 +350,12 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr('y', d => yAxisBar(d.value))
         .attr('width', xSubGroupBar.bandwidth())
         .attr('height', d => heightBar - yAxisBar(d.value))
-        .attr('fill', d => colorBar(d.key));
+        .attr('fill', d => colorBar(d.key))
+        .on("mouseover", mouseoverbar)
+        .on("mousemove", mousemovebar)
+        .on("mouseleave", mouseleavebar)
+        console.log(data);
+  svg3.append(tooltipBar);
 
     // add a legend
     svg3.append('rect')
@@ -352,8 +387,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
     let margin4 = {top: 10, right: 30, bottom: 20, left: 50},
         width4 = 800 - margin4.left - margin4.right,
         height4= 800 - margin4.top - margin4.bottom;
-
-
 
 // -----------Scatterplot:-------------
     const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
@@ -430,6 +463,7 @@ const tooltip = d3.select("#scatterplot")
 
 // Add values to tooltip on mouseover, make tooltip div opaque
 const mouseover = function(event, d) {
+    console.log(d)
     tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
         .style("opacity", 1);
 }
