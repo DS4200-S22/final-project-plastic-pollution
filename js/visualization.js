@@ -128,109 +128,279 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .on("mousemove", mouseMove)
 
 })
-    // PIE CHART CODE STARTS HERE
-    // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
-    // set the dimensions and margins of the graph
+// PIE CHART CODE STARTS HERE
+
+// SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
+
+// set the dimensions and margins of the graph
+
     let margin2 = {
+
         top: 30,
+
         right: 30,
+
         bottom: 30,
+
         left: 30
+
     }
+
     let chart = {
+
         width: 1000,
+
         height: 500,
+
         margin2: 70
+
     };
 
+
     chart.rightEdge = margin2.left + chart.width;
+
     chart.bottomEdge = margin2.top + chart.height;
+
     chart.totalHeight = chart.bottomEdge + margin2.bottom;
+
     chart.totalWidth = chart.rightEdge + margin2.right;
 
 
-    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+
     const radius = Math.min(chart.width, chart.height) / 2 - chart.margin2;
 
+
     const color2 = d3.scaleOrdinal()
+
         .range(['salmon', 'cornflowerblue', 'darkseagreen', 'goldenrod'])
 
-    // append the svg object to the div called 'viz-holder'
+
+// append the svg object to the div called 'viz-holder'
+
     let svg2 = d3.select("#pie")
+
         .append("svg")
+
         .attr("width", chart.width)
+
         .attr("height", chart.height)
+
         .append("g")
+
         .attr("transform", "translate(" + chart.width / 2 + "," + chart.height / 2 + ")");
 
+
     let averages = d3
+
         .rollups(
+
             data,
+
             (xs) => d3.mean(xs, (x) => x['waste_generation_rate(kg/person/day)']),
+
             (d) => d.economic_status
+
         )
+
         .map(([k, v]) => ({economic_status: k, 'waste_generation_rate(kg/person/day)': v}));
 
+
+    let avg_waste_gen = averages.map(function(d) { return d['waste_generation_rate(kg/person/day)']; });
+
+
+    let total = d3.sum(averages.map(function(d) { return d['waste_generation_rate(kg/person/day)']; }));
+
+
+    console.log(averages);
+
+    console.log(avg_waste_gen);
+
+    console.log(total);
+
+
     const economicStatusNames = {
+
         LMI: "Low Middle Income",
+
         UMI: "Upper Middle Income",
+
         HIC: "High Income Countries",
+
         LI: "Low Income Countries"
+
     }
 
-    // Creaing pie chart:
+
+// Creaing pie chart:
+
     let pie = d3.pie().value(function (d) {
+
         return d['waste_generation_rate(kg/person/day)'];
+
     });
 
-    // Creating arc
+
+// Creating arc
+
     let arc = d3.arc()
+
         .outerRadius(radius)
+
         .innerRadius(0);
 
-    // Grouping different arcs
+
+// Grouping different arcs
+
     let arcs = svg2.selectAll("arc")
+
         .data(pie(averages))
+
         .enter()
+
         .append("g");
 
-    // Appending path
-    arcs.append("path")
+
+// Appending path
+
+    let path2 = arcs.append("path")
+
         .attr("fill", (d, i) => {
+
             return color2(i)
+
         })
+
         .attr("d", arc);
 
-    // Add Labels
+
+// Add Labels
+
     let label = d3.arc()
+
         .outerRadius(radius)
+
         .innerRadius(0);
 
 
-    arcs.append("text")
-        .attr("transform", function (d) {
-            return "translate(" + label.centroid(d) + ")";
-        })
-        .text(function (d) {
-            return d.data.economic_status;
-        })
-        .style("font-family", "arial")
-        .style("font-size", 15);
+// arcs.append("text")
 
-    // Handmade legend
+//     .attr("transform", function (d) {
+
+//         return "translate(" + label.centroid(d) + ")";
+
+//     })
+
+//     .text(function (d) {
+
+//         return d.data.economic_status;
+
+//     })
+
+//     .style("font-family", "arial")
+
+//     .style("font-size", 15);                                                       // NEW
+
+
+// Handmade legend
+
     svg2.append("circle").attr("cx", -415).attr("cy", -160).attr("r", 6).style("fill", "goldenrod")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -140).attr("r", 6).style("fill", "salmon")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -120).attr("r", 6).style("fill", "cornflowerblue")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -100).attr("r", 6).style("fill", "darkseagreen")
 
+
     svg2.append("text").attr("x", -400).attr("y", -160).text("Lower Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -140).text("Lower Middle Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -120).text("Upper Middle Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -100).text("High Income Country").style("font-size", "15px").attr("alignment-baseline", "middle")
+
 
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
-    // -- Grouped Bar Chart --
+
+//Tooltip Set-up
+
+    const yTooltipOffset2 = 15;
+
+
+// Add div for tooltip to webpage
+
+    const tooltip2 = d3.select("#pie")
+
+        .append("div")
+
+        .attr('id', "tooltip2")
+
+        .style("opacity", 0)
+
+        .attr("class", "tooltip2");
+
+
+// Add values to tooltip on mouseover, make tooltip div opaque
+
+    const mouseover2 = function(event, d) {
+
+        let avg_waste_gen = averages.map(function(d) {
+
+            return (d['waste_generation_rate(kg/person/day)']); });
+
+        let total = d3.sum(averages.map(function(d) {                // NEW
+
+            return (d['waste_generation_rate(kg/person/day)']); }));
+
+        let percent = Math.round(1000 * d.data['waste_generation_rate(kg/person/day)'] / total) / 10;
+
+        tooltip2.html("Economic Status: " + d.data.economic_status + "<br> Waste Generation (kg/person/day): " + d.data['waste_generation_rate(kg/person/day)'] + "<br> Percent: " + percent + '%')
+
+            .style("opacity", 1);
+
+    }
+
+
+    console.log(data[0].economic_status);
+
+    console.log(avg_waste_gen[0]);
+
+
+// Position tooltip to follow mouse
+
+    const mousemove2 = function(event, d) {
+
+        tooltip2.style("left", (event.pageX) + "px")
+
+            .style("top", (event.pageY + yTooltipOffset2) + "px");
+
+    }
+
+
+// Return tooltip to transparent when mouse leaves
+
+    const mouseleave2 = function(event, d) {
+
+        tooltip2.style("opacity", 0);
+
+    }
+
+
+    path2.on("mouseover", mouseover2)
+
+    path2.on("mousemove", mousemove2)
+
+    path2.on("mouseleave", mouseleave2);
+
+    // svg2.append(tooltip2);
+
+
+
+    // -- GROUPED BARCHART STARTS HERE--
     let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
         widthBar = 500,
         heightBar = 500;
