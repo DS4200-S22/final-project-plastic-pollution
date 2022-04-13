@@ -77,10 +77,11 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .style("opacity", 1)
             .style("visibility", "visible")
     }
+    let commaFormat = d3.format(",")
 
     let mouseMove = function(d, event) {
         tooltip1
-            .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + event.total + " kg/day")
+            .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + commaFormat(event.total) + " kg/day")
             .style("text-align", "center")
     }
 
@@ -355,7 +356,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .range(['salmon','cornflowerblue'])
 
 //Tooltip Set-up
-    const yTooltipOffsetBar = 0;
+    const yTooltipOffsetBar = 15;
 
 // Add div for tooltip to webpage
     const tooltipBar = d3.select("#bar")
@@ -505,9 +506,10 @@ const tooltip = d3.select("#scatterplot")
     .style("opacity", 0)
     .attr("class", "tooltip");
 
+let commas = d3.format(",")
 // Add values to tooltip on mouseover, make tooltip div opaque
 const mouseover = function(event, d) {
-    tooltip.html("Country: " + d.country + "<br> Waste Generation Rate (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+    tooltip.html("Country: " + d.country + "<br> Waste Generation Rate (kg/person/day): " + commas(d[yKey1]) + "<br>Coastal Population: " + commas(d[xKey1]))
         .style("opacity", 1);
 }
 
