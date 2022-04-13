@@ -5,29 +5,30 @@
 </head>
 <body>
 
-<div id="main_content">
+<!-- Tab links -->
+<div class="tab">
+  <button class="tablinks" onclick="openCity(event, 'page1_desc')"> Map View </button>
+  <button class="tablinks" onclick="openCity(event, 'page2_desc')">Mismanaged Waste view</button>
+  <button class="tablinks" onclick="openCity(event, 'page3_desc')">Economic Status Pie Chart </button>
+</div>
 
-  <li class="selected" id="page1" onclick="change_tab(this.id);">Page1</li>
-  <li class="notselected" id="page2" onclick="change_tab(this.id);">Page2</li>
-  <li class="notselected" id="page3" onclick="change_tab(this.id);">Page3</li>
+<!-- Tab content -->
+<div id="page1_desc" class="tabcontent">
+  <h3>Map View</h3>
+  <h3 class="map-title">Chloropleth Map of Waste Generation</h3>
+  <svg id="my_dataviz" class="my_dataviz" width="960" height="480"></svg>
+  <p></p>
+</div>
 
-  <div class='hidden_desc' id="page1_desc">
-    <h2>Page 1 hello</h2>
-  </div>
+<div id="page2_desc" class="tabcontent">
+  <h3>Mismanaged Waste View</h3>
+  <p></p>
+</div>
 
-  <div class='hidden_desc' id="page2_desc">
-    <h2>Page 2</h2>
-  </div>
-
-  <div class='hidden_desc' id="page3_desc">
-    <h2>Page 3</h2>
-  </div>
-
-  <div id="page_content">
-    <h2>hello</h2>
-  </div>
-
-
+<div id="page3_desc" class="tabcontent">
+  <h3>Economic Status Pie Chart</h3>
+  <p></p>
+</div>
 </div>
 
 <script src='lib/d3.v6.1.1/d3.min.js'></script>
