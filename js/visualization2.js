@@ -5,10 +5,11 @@ d3.csv("data/updated_data.csv").then((data) => {
 // SOURCE1: https://d3-graph-gallery.com/graph/choropleth_hover_effect.html
 // SOURCE2:
 
+
 // The svg
-let svg = d3.select("svg"),
-    width1 = +svg.attr("width"),
-    height1 = +svg.attr("height"),
+let svg = d3.select("#page1_desc"),
+    width1 = 500,
+    height1 = 500,
     margin1 = {top: 20, right: 10, bottom: 40, left: 100};
 
 // const labels = ["< 500000 kg/day", "< 500000 kg/day - < 100000000 kg/day", "> 100000000 kg/day"]
@@ -142,6 +143,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave)
 
+    svg = d3.select("#page1_desc")
 })
     // PIE CHART CODE STARTS HERE
     // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
@@ -171,7 +173,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .range(['salmon', 'cornflowerblue', 'darkseagreen', 'goldenrod'])
 
     // append the svg object to the div called 'viz-holder'
-    let svg2 = d3.select("#pie")
+    let svg2 = d3.select("#page3_desc")
         .append("svg")
         .attr("width", chart.width)
         .attr("height", chart.height)
@@ -221,7 +223,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .outerRadius(radius)
         .innerRadius(0);
 
-
     arcs.append("text")
         .attr("transform", function (d) {
             return "translate(" + label.centroid(d) + ")";
@@ -245,7 +246,50 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
-    // -- Grouped Bar Chart --
+    //Tooltip Set-up
+
+    const yTooltipOffset2 = 15;
+
+// Add div for tooltip to webpage
+
+    const tooltip2 = d3.select("#page3_desc")
+        .append("div")
+        .attr('id', "tooltip2")
+        .style("opacity", 0)
+        .attr("class", "tooltip2");
+
+
+// Add values to tooltip on mouseover, make tooltip div opaque
+    const mouseover2 = function(event, d) {
+        let avg_waste_gen = averages.map(function(d) {
+            return (d['waste_generation_rate(kg/person/day)']); });
+        let total = d3.sum(averages.map(function(d) {                // NEW
+            return (d['waste_generation_rate(kg/person/day)']); }));
+        let percent = Math.round(1000 * d.data['waste_generation_rate(kg/person/day)'] / total) / 10;
+        tooltip2.html("Economic Status: " + d.data.economic_status + "<br> Waste Generation (kg/person/day): " + d.data['waste_generation_rate(kg/person/day)'] + "<br> Percent: " + percent + '%')
+            .style("opacity", 1);
+
+    }
+
+// Position tooltip to follow mouse
+
+    const mousemove2 = function(event, d) {
+        tooltip2.style("left", (event.pageX) + "px")
+            .style("top", (event.pageY + yTooltipOffset2) + "px");
+    }
+
+// Return tooltip to transparent when mouse leaves
+
+    const mouseleave2 = function(event, d) {
+        tooltip2.style("opacity", 0);
+    }
+
+    arcs.on("mouseover", mouseover2)
+    arcs.on("mousemove", mousemove2)
+    arcs.on("mouseleave", mouseleave2);
+
+
+    // -- GROUPED BARCHART STARTS HERE--
     let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
         widthBar = 500,
         heightBar = 500;
@@ -254,7 +298,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     let subGroupBar = ['mismanaged_plastic_waste_in_2010(tonnes)', 'mismanaged_plastic_waste_in_2025(tonnes)'];
 
-    let svg3 = d3.select("#bar")
+    let svg3 = d3.select("#page2_desc")
         .append("svg")
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .attr('width', '100%')
@@ -296,17 +340,49 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .style('font-size', '20px')
         .text('Mismanaged Plastic Waste (Tonnes)');
 
-    // scale for medal subgroup
+    // scale for continent subgroup
     let xSubGroupBar = d3.scaleBand()
         .domain(subGroupBar)
         .range([0, xAxisBar.bandwidth()])
         .padding([0.05])
 
-    // color palette for medals
+    // color palette for years
     let colorBar = d3.scaleOrdinal()
         .domain(subGroupBar)
         .range(['salmon','cornflowerblue'])
 
+//Tooltip Set-up
+    const yTooltipOffsetBar = 0;
+
+
+// Add div for tooltip to webpage
+    const tooltipBar = d3.select("#page2_desc")
+        .append("div")
+        .attr('id', "tooltip")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+
+    let formatted = d3.format(",")
+
+// Add values to tooltip on mouseover, make tooltip div opaque
+    const mouseoverbar = function(event, d) {
+        tooltipBar.html(formatted(d.value) + " Tonnes")
+            .style("opacity", 1)
+        ;
+    }
+
+// Position tooltip to follow mouse
+    const mousemovebar = function(event, d) {
+        tooltipBar.style("left", (event.pageX) + "px")
+            .style("top", (event.pageY + yTooltipOffsetBar) + "px");
+    }
+
+// Return tooltip to transparent when mouse leaves
+    const mouseleavebar = function(event, d) {
+        tooltipBar.style("opacity", 0);
+    }
+
+// svg3.append(tooltipBar);
     // add the bars
     svg3.append('g')
         .selectAll('g')
@@ -320,7 +396,12 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr('y', d => yAxisBar(d.value))
         .attr('width', xSubGroupBar.bandwidth())
         .attr('height', d => heightBar - yAxisBar(d.value))
-        .attr('fill', d => colorBar(d.key));
+        .attr('fill', d => colorBar(d.key))
+        .on("mouseover", mouseoverbar)
+        .on("mousemove", mousemovebar)
+        .on("mouseleave", mouseleavebar);
+
+    // svg3.append(tooltipBar);
 
     // add a legend
     svg3.append('rect')
@@ -348,13 +429,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .text('2025')
         .style('font-size', '15px')
 
-// set the dimensions and margins of the graph
-    let margin4 = {top: 10, right: 30, bottom: 20, left: 50},
-        width4 = 800 - margin4.left - margin4.right,
-        height4= 800 - margin4.top - margin4.bottom;
-
-
-
 // -----------Scatterplot:-------------
     const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
     const width3 = 1000; //- margin3.left - margin.right;
@@ -362,7 +436,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
 // Append svg object to the body of the page to house the scatterplot
 
-    const svg4 = d3.select("#scatterplot")
+    const svg4 = d3.select("#page2_desc")
         .append("svg")
         .attr("width", width3 - margin3.left - margin3.right)
         .attr("height", height3 - margin3.top - margin3.bottom)
@@ -422,7 +496,7 @@ const yTooltipOffset = 15;
 
 
 // Add div for tooltip to webpage
-const tooltip = d3.select("#scatterplot")
+const tooltip = d3.select("#page2_desc")
     .append("div")
     .attr('id', "tooltip")
     .style("opacity", 0)
@@ -461,12 +535,10 @@ svg4.append(tooltip);
 
 });
 
-
-
 /// Function for tabs:
 function change_tab(id)
 {
-    //document.getElementById("page_content").innerHTML=document.getElementById(id+"_desc").innerHTML;
+    document.getElementById("page_content").innerHTML=document.getElementById(id+"_desc").innerHTML;
     document.getElementById("page1").className="notselected";
     document.getElementById("page2").className="notselected";
     document.getElementById("page3").className="notselected";
