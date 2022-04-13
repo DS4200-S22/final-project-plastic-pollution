@@ -61,7 +61,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
                 title: "Russia",
                 wrap: 150,  // try something smaller to see text split in several lines
                 padding: 10   // More = text lower
-
             },
             color: ["#62b6ef"],
             x: projection([150.916672,-31.083332])[0],
@@ -143,7 +142,8 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave)
 
-    svg = d3.select("#page1_desc")
+   // svg = d3.select("#page1_desc")
+    //data1 = d3.select("#page1_desc");
 })
     // PIE CHART CODE STARTS HERE
     // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
@@ -531,17 +531,27 @@ svg4.selectAll(".point")
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
-svg4.append(tooltip);
+//(tooltip);
 
 });
 
-/// Function for tabs:
-function change_tab(id)
-{
-    document.getElementById("page_content").innerHTML=document.getElementById(id+"_desc").innerHTML;
-    document.getElementById("page1").className="notselected";
-    document.getElementById("page2").className="notselected";
-    document.getElementById("page3").className="notselected";
-    document.getElementById(id).className="selected";
-}
+function openCity(evt, cityName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
 
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
