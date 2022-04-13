@@ -3,29 +3,27 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 // WORLD MAP CODE STARTS HERE...
 // SOURCE1: https://d3-graph-gallery.com/graph/choropleth_hover_effect.html
-// SOURCE2:
+// SOURCE2: https://d3-graph-gallery.com/graph/scatter_tooltip.html
 
 // The svg
 let svg = d3.select("svg"),
     width1 = +svg.attr("width"),
     height1 = +svg.attr("height"),
-    margin1 = {top: 20, right: 10, bottom: 40, left: 100};
-
-// const labels = ["< 500000 kg/day", "< 500000 kg/day - < 100000000 kg/day", "> 100000000 kg/day"]
+    margin1 = {top: 50, right: 100, bottom: 50, left: 50};
 
 // Map and projection
 let path = d3.geoPath();
 
 let projection = d3.geoMercator()
-    .scale(120)
-    .center([0, 5])
+    .scale(100)
+    .center([75, 0])
     .translate([width1 / 2, height1 / 2]);
 
 
 // Data and color scale
 let data1 = new Map()
 let colorScale = d3.scaleThreshold()
-    .domain([0, 50, 5000, 50000, 500000, 5000000, 500000000])
+    .domain([0, 500, 50000, 500000, 5000000, 50000000, 500000000])
     .range(d3.schemeBlues[6]);
 
 // Load external data and boot
@@ -35,8 +33,22 @@ promises.push(d3.csv("data/updated_data.csv", function(d) { data1.set(d.code, +d
 
 myDataPromises = Promise.all(promises).then(function(mydata) {
 
+    let topo = mydata[0]
+
+    // tooltip
+    let tooltip1 = d3.select(".vis-holder")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip1")
+        .style("background-color", "skyblue")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("margin-right", "732px")
+
+
     // legend
-    const legend_x = width1 - margin1.left - 120
+    const legend_x = width1 - margin1.left - 200
     const legend_y = height1 - 200
 
     svg.append("g")
@@ -52,38 +64,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
     svg.select(".legendQuant")
         .call(legendLinear)
 
-    // Features of the annotation
-    const annotations = [
-        {
-            note: {
-                label: "Waste Generation 10,055,659 kg/day",
-                title: "Russia",
-                wrap: 150,  // try something smaller to see text split in several lines
-                padding: 10   // More = text lower
-
-            },
-            color: ["#62b6ef"],
-            x: projection([150.916672,-31.083332])[0],
-            y: projection([150.916672,67.083332])[1],
-            dy: -30,
-            dx: 10
-        }
-    ]
-
-    // Add annotation to the chart
-    let makeAnnotations = function(d) {
-
-        let ann = d3.annotation().annotations(annotations)
-
-        svg.append("g")
-            .style("opacity", 1)
-            .attr("id", "annotation")
-            .call(ann)
-
-        console.log("Annotations function hit")
-    }
-
-    let topo = mydata[0]
 
     let mouseOver = function(d, event) {
         d3.selectAll(".Country")
@@ -94,13 +74,16 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .duration(200)
             .style("stroke", "black")
 
-        d3.select(this)
-            .on("click", makeAnnotations)
-
         // tooltip
-        d3.selectAll("#annotation")
-            .style("opacity", 0)
-            .style("opacity", 0.8)
+        tooltip1
+            .style("opacity", 1)
+            .style("visibility", "visible")
+    }
+
+    let mouseMove = function(d, event) {
+        tooltip1
+            .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + event.total + " kg/day")
+            .style("text-align", "center")
     }
 
     let mouseLeave = function(d) {
@@ -114,9 +97,10 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .style("stroke", "transparent")
 
         // tooltip
-        d3.selectAll("#annotation")
-            // .style("opacity", 1)
-            .style("opacity", 0)
+        tooltip1
+            .transition()
+            .duration(200)
+            .style("opacity", 1)
     }
 
     // Draw the map
@@ -141,111 +125,282 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .style("opacity", .8)
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave)
+        .on("mousemove", mouseMove)
 
 })
-    // PIE CHART CODE STARTS HERE
-    // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
-    // set the dimensions and margins of the graph
+// PIE CHART CODE STARTS HERE
+
+// SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
+
+// set the dimensions and margins of the graph
+
     let margin2 = {
+
         top: 30,
+
         right: 30,
+
         bottom: 30,
+
         left: 30
+
     }
+
     let chart = {
+
         width: 1000,
+
         height: 500,
+
         margin2: 70
+
     };
 
+
     chart.rightEdge = margin2.left + chart.width;
+
     chart.bottomEdge = margin2.top + chart.height;
+
     chart.totalHeight = chart.bottomEdge + margin2.bottom;
+
     chart.totalWidth = chart.rightEdge + margin2.right;
 
 
-    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+
     const radius = Math.min(chart.width, chart.height) / 2 - chart.margin2;
 
+
     const color2 = d3.scaleOrdinal()
+
         .range(['salmon', 'cornflowerblue', 'darkseagreen', 'goldenrod'])
 
-    // append the svg object to the div called 'viz-holder'
+
+// append the svg object to the div called 'viz-holder'
+
     let svg2 = d3.select("#pie")
+
         .append("svg")
+
         .attr("width", chart.width)
+
         .attr("height", chart.height)
+
         .append("g")
+
         .attr("transform", "translate(" + chart.width / 2 + "," + chart.height / 2 + ")");
 
+
     let averages = d3
+
         .rollups(
+
             data,
+
             (xs) => d3.mean(xs, (x) => x['waste_generation_rate(kg/person/day)']),
+
             (d) => d.economic_status
+
         )
+
         .map(([k, v]) => ({economic_status: k, 'waste_generation_rate(kg/person/day)': v}));
 
+
+    let avg_waste_gen = averages.map(function(d) { return d['waste_generation_rate(kg/person/day)']; });
+
+
+    let total = d3.sum(averages.map(function(d) { return d['waste_generation_rate(kg/person/day)']; }));
+
+
+    console.log(averages);
+
+    console.log(avg_waste_gen);
+
+    console.log(total);
+
+
     const economicStatusNames = {
+
         LMI: "Low Middle Income",
+
         UMI: "Upper Middle Income",
+
         HIC: "High Income Countries",
+
         LI: "Low Income Countries"
+
     }
 
-    // Creaing pie chart:
+
+// Creaing pie chart:
+
     let pie = d3.pie().value(function (d) {
+
         return d['waste_generation_rate(kg/person/day)'];
+
     });
 
-    // Creating arc
+
+// Creating arc
+
     let arc = d3.arc()
+
         .outerRadius(radius)
+
         .innerRadius(0);
 
-    // Grouping different arcs
+
+// Grouping different arcs
+
     let arcs = svg2.selectAll("arc")
+
         .data(pie(averages))
+
         .enter()
+
         .append("g");
 
-    // Appending path
-    arcs.append("path")
+
+// Appending path
+
+    let path2 = arcs.append("path")
+
         .attr("fill", (d, i) => {
+
             return color2(i)
+
         })
+
         .attr("d", arc);
 
-    // Add Labels
+
+// Add Labels
+
     let label = d3.arc()
+
         .outerRadius(radius)
+
         .innerRadius(0);
 
 
-    arcs.append("text")
-        .attr("transform", function (d) {
-            return "translate(" + label.centroid(d) + ")";
-        })
-        .text(function (d) {
-            return d.data.economic_status;
-        })
-        .style("font-family", "arial")
-        .style("font-size", 15);
+// arcs.append("text")
 
-    // Handmade legend
+//     .attr("transform", function (d) {
+
+//         return "translate(" + label.centroid(d) + ")";
+
+//     })
+
+//     .text(function (d) {
+
+//         return d.data.economic_status;
+
+//     })
+
+//     .style("font-family", "arial")
+
+//     .style("font-size", 15);                                                       // NEW
+
+
+// Handmade legend
+
     svg2.append("circle").attr("cx", -415).attr("cy", -160).attr("r", 6).style("fill", "goldenrod")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -140).attr("r", 6).style("fill", "salmon")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -120).attr("r", 6).style("fill", "cornflowerblue")
+
     svg2.append("circle").attr("cx", -415).attr("cy", -100).attr("r", 6).style("fill", "darkseagreen")
 
+
     svg2.append("text").attr("x", -400).attr("y", -160).text("Lower Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -140).text("Lower Middle Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -120).text("Upper Middle Income Country ").style("font-size", "15px").attr("alignment-baseline", "middle")
+
     svg2.append("text").attr("x", -400).attr("y", -100).text("High Income Country").style("font-size", "15px").attr("alignment-baseline", "middle")
+
 
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
-    // -- Grouped Bar Chart --
+
+//Tooltip Set-up
+
+    const yTooltipOffset2 = 15;
+
+
+// Add div for tooltip to webpage
+
+    const tooltip2 = d3.select("#pie")
+
+        .append("div")
+
+        .attr('id', "tooltip2")
+
+        .style("opacity", 0)
+
+        .attr("class", "tooltip2");
+
+
+// Add values to tooltip on mouseover, make tooltip div opaque
+
+    const mouseover2 = function(event, d) {
+
+        let avg_waste_gen = averages.map(function(d) {
+
+            return (d['waste_generation_rate(kg/person/day)']); });
+
+        let total = d3.sum(averages.map(function(d) {                // NEW
+
+            return (d['waste_generation_rate(kg/person/day)']); }));
+
+        let percent = Math.round(1000 * d.data['waste_generation_rate(kg/person/day)'] / total) / 10;
+
+        tooltip2.html("Economic Status: " + d.data.economic_status + "<br> Waste Generation (kg/person/day): " + d.data['waste_generation_rate(kg/person/day)'] + "<br> Percent: " + percent + '%')
+
+            .style("opacity", 1);
+
+    }
+
+
+    console.log(data[0].economic_status);
+
+    console.log(avg_waste_gen[0]);
+
+
+// Position tooltip to follow mouse
+
+    const mousemove2 = function(event, d) {
+
+        tooltip2.style("left", (event.pageX) + "px")
+
+            .style("top", (event.pageY + yTooltipOffset2) + "px");
+
+    }
+
+
+// Return tooltip to transparent when mouse leaves
+
+    const mouseleave2 = function(event, d) {
+
+        tooltip2.style("opacity", 0);
+
+    }
+
+
+    path2.on("mouseover", mouseover2)
+
+    path2.on("mousemove", mousemove2)
+
+    path2.on("mouseleave", mouseleave2);
+
+    // svg2.append(tooltip2);
+
+
+
+    // -- GROUPED BARCHART STARTS HERE--
     let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
         widthBar = 500,
         heightBar = 500;
@@ -307,6 +462,38 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .domain(subGroupBar)
         .range(['salmon','cornflowerblue'])
 
+//Tooltip Set-up
+    const yTooltipOffsetBar = 0;
+
+
+// Add div for tooltip to webpage
+    const tooltipBar = d3.select("#bar")
+        .append("div")
+        .attr('id', "tooltip")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+
+    let formatted = d3.format(",")
+// Add values to tooltip on mouseover, make tooltip div opaque
+    const mouseoverbar = function(event, d) {
+        tooltipBar.html(formatted(d.value) + " Tonnes")
+            .style("opacity", 1)
+        ;
+    }
+
+// Position tooltip to follow mouse
+    const mousemovebar = function(event, d) {
+        tooltipBar.style("left", (event.pageX) + "px")
+            .style("top", (event.pageY + yTooltipOffsetBar) + "px");
+    }
+
+// Return tooltip to transparent when mouse leaves
+    const mouseleavebar = function(event, d) {
+        tooltipBar.style("opacity", 0);
+    }
+
+
+// svg3.append(tooltipBar);
     // add the bars
     svg3.append('g')
         .selectAll('g')
@@ -320,7 +507,12 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr('y', d => yAxisBar(d.value))
         .attr('width', xSubGroupBar.bandwidth())
         .attr('height', d => heightBar - yAxisBar(d.value))
-        .attr('fill', d => colorBar(d.key));
+        .attr('fill', d => colorBar(d.key))
+        .on("mouseover", mouseoverbar)
+        .on("mousemove", mousemovebar)
+        .on("mouseleave", mouseleavebar);
+
+    // svg3.append(tooltipBar);
 
     // add a legend
     svg3.append('rect')
@@ -347,12 +539,6 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr('y', marginBar.bottom + 41)
         .text('2025')
         .style('font-size', '15px')
-
-// set the dimensions and margins of the graph
-    let margin4 = {top: 10, right: 30, bottom: 20, left: 50},
-        width4 = 800 - margin4.left - margin4.right,
-        height4= 800 - margin4.top - margin4.bottom;
-
 
 
 // -----------Scatterplot:-------------
@@ -430,7 +616,7 @@ const tooltip = d3.select("#scatterplot")
 
 // Add values to tooltip on mouseover, make tooltip div opaque
 const mouseover = function(event, d) {
-    tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+    tooltip.html("Country: " + d.country + "<br> Waste Generation Rate (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
         .style("opacity", 1);
 }
 

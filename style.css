@@ -72,9 +72,10 @@ h1, h2, h3 {
 	text-align: center;
 	padding: .3rem;
 	background: #313639;
-	color: blue;
+	color: #f9f9f9;
 	border: 0;
 	border-radius: 8px;
 	pointer-events: none;
 	font-size: .7rem;
 }
+
