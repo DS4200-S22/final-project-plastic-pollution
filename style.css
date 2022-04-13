@@ -52,3 +52,10 @@ h1, h2, h3 {
 	font-size: 11px;
 	fill: #3c373d;
 }
+
+/* black borders */
+.selected {
+  stroke: black;
+  stroke-width: 5px;
+  opacity: 1;
+}
