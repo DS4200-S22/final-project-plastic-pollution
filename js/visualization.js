@@ -292,6 +292,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     // svg2.append(tooltip2);
 
+
     // -- GROUPED BARCHART STARTS HERE--
     let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
         widthBar = 500,
@@ -366,6 +367,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
 
     let formatted = d3.format(",")
+
 // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseoverbar = function(event, d) {
         tooltipBar.html(formatted(d.value) + " Tonnes")

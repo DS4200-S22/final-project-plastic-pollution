@@ -53,31 +53,32 @@
 <!-- Visualization -->
 <h1>Visualization</h1>
 
-<div id="map" class='vis-holder'>
+<!-- Tab links -->
+<div class="tab">
+  <button class="tablinks" onclick="openPage(event, 'page1_desc')" id = "defaultOpen">Map View</button>
+  <button class="tablinks" onclick="openPage(event, 'page2_desc')">Mismanaged Waste View</button>
+  <button class="tablinks" onclick="openPage(event, 'page3_desc')">Economic Status Pie Chart </button>
+</div>
+
+<!-- Tab content -->
+<div id="page1_desc" class="tabcontent">
   <h3 class="map-title">Chloropleth Map of Waste Generation</h3>
-  <svg id="my_dataviz" class="my_dataviz" width="960" height="480"></svg>
+  <svg id="my_dataviz" class="my_dataviz" width="1200" height="600"></svg>
+  <p></p>
 </div>
 
-<div id="pie" class='vis-holder' >
-
+<div id="page2_desc" class="tabcontent">
+  <h3>Mismanaged Waste View</h3>
+  <svg id="bar_viz" class="my_dataviz" width="600" height="600"></svg>
+  <svg id="scatter_viz" class="my_dataviz" width="1000" height="600"></svg>
+  <p></p>
 </div>
 
-<div id="bar" class='vis-holder' >
-
+<div id="page3_desc" class="tabcontent">
+  <h3>Economic Status Pie Chart</h3>
+  <p></p>
 </div>
-
-<div id="scatterplot" class='vis-holder' >
-We plan to implement brushing and linking with the scatter plot and the grouped bar chart to show the relationship and commonalities.
 </div>
-
-
-
-
-
-
-
-
-
 
 <!-- More writeup -->
 <div class = 'content-column'>
@@ -125,7 +126,7 @@ We plan to implement brushing and linking with the scatter plot and the grouped 
 <!-- Scripts at the end avoid need for dealing with async, defer, or onload event handlers -->
 <script src='lib/d3.v6.1.1/d3.min.js'></script>
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
-<script src='js/visualization.js'></script>
+<script src='js/visualization2.js'></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.js" integrity="sha512-5mCB0Kvv97yTzqo0174qxPjMisck/WlK51+mw/RV7UfYbtHI8LuLR82BzZuxHUKSfbh75u9cZHgUcqrZDaBJuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 </body>
