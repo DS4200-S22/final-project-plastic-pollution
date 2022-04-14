@@ -7,144 +7,122 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 
 // The svg
-let svg = d3.select("#page1_desc"),
-    width1 = 500,
-    height1 = 500,
-    margin1 = {top: 20, right: 10, bottom: 40, left: 100};
-
-// const labels = ["< 500000 kg/day", "< 500000 kg/day - < 100000000 kg/day", "> 100000000 kg/day"]
+let svg = d3.select("#my_dataviz"),
+    width1 = +svg.attr("width"),
+    height1 = +svg.attr("height"),
+    margin1 = {top: 50, right: 100, bottom: 50, left: 50};
 
 // Map and projection
-let path = d3.geoPath();
+    let path = d3.geoPath();
 
-let projection = d3.geoMercator()
-    .scale(120)
-    .center([0, 5])
-    .translate([width1 / 2, height1 / 2]);
-
+    let projection = d3.geoMercator()
+        .scale(100)
+        .center([75, 0])
+        .translate([width1 / 2, height1 / 2]);
 
 // Data and color scale
-let data1 = new Map()
-let colorScale = d3.scaleThreshold()
-    .domain([0, 50, 5000, 50000, 500000, 5000000, 500000000])
-    .range(d3.schemeBlues[6]);
+    let data1 = new Map()
+    let colorScale = d3.scaleThreshold()
+        .domain([0, 500, 50000, 500000, 5000000, 50000000, 500000000])
+        .range(d3.schemeBlues[6]);
 
 // Load external data and boot
-let promises = []
-promises.push(d3.json("data/countries.geojson"))
-promises.push(d3.csv("data/updated_data.csv", function(d) { data1.set(d.code, +d.waste_gen); }))
+    let promises = []
+    promises.push(d3.json("data/countries.geojson"))
+    promises.push(d3.csv("data/updated_data.csv", function(d) { data1.set(d.code, +d.waste_gen); }))
 
-myDataPromises = Promise.all(promises).then(function(mydata) {
+    myDataPromises = Promise.all(promises).then(function(mydata) {
 
-    // legend
-    const legend_x = width1 - margin1.left - 120
-    const legend_y = height1 - 200
+        let topo = mydata[0]
 
-    svg.append("g")
-        .attr("class", "legendQuant")
-        .attr("transform", "translate(" + legend_x + "," + legend_y+")")
+        // tooltip
+        let tooltip1 = d3.select("#page1_desc")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip1")
+            .style("background-color", "skyblue")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("margin-right", "732px")
 
-    let legendLinear = d3.legendColor()
-        .title("Waste Generation (kg/day)")
-        .shapeWidth(25)
-        .orient('vertical')
-        .scale(colorScale);
-
-    svg.select(".legendQuant")
-        .call(legendLinear)
-
-    // Features of the annotation
-    const annotations = [
-        {
-            note: {
-                label: "Waste Generation 10,055,659 kg/day",
-                title: "Russia",
-                wrap: 150,  // try something smaller to see text split in several lines
-                padding: 10   // More = text lower
-            },
-            color: ["#62b6ef"],
-            x: projection([150.916672,-31.083332])[0],
-            y: projection([150.916672,67.083332])[1],
-            dy: -30,
-            dx: 10
-        }
-    ]
-
-    // Add annotation to the chart
-    let makeAnnotations = function(d) {
-
-        let ann = d3.annotation().annotations(annotations)
+        // legend
+        const legend_x = width1 - margin1.left - 200
+        const legend_y = height1 - 200
 
         svg.append("g")
-            .style("opacity", 1)
-            .attr("id", "annotation")
-            .call(ann)
+            .attr("class", "legendQuant")
+            .attr("transform", "translate(" + legend_x + "," + legend_y+")")
 
-        console.log("Annotations function hit")
-    }
+        let legendLinear = d3.legendColor()
+            .title("Waste Generation (kg/day)")
+            .shapeWidth(25)
+            .orient('vertical')
+            .scale(colorScale);
 
-    let topo = mydata[0]
+        svg.select(".legendQuant")
+            .call(legendLinear)
 
-    let mouseOver = function(d, event) {
-        d3.selectAll(".Country")
-            .transition()
-            .duration(200)
-        d3.select(this)
-            .transition()
-            .duration(200)
-            .style("stroke", "black")
+        let mouseOver = function(d, event) {
+            d3.selectAll(".Country")
+                .transition()
+                .duration(200)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("stroke", "black")
 
-        d3.select(this)
-            .on("click", makeAnnotations)
+            // tooltip
+            tooltip1
+                .style("opacity", 1)
+        }
 
-        // tooltip
-        d3.selectAll("#annotation")
-            .style("opacity", 0)
-            .style("opacity", 0.8)
-    }
+        let mouseMove = function(d, event) {
+            tooltip1
+                .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + event.total + " kg/day")
+                .style("text-align", "center")
+        }
 
-    let mouseLeave = function(d) {
-        d3.selectAll(".Country")
-            .transition()
-            .duration(200)
+        let mouseLeave = function(d) {
+            d3.selectAll(".Country")
+                .transition()
+                .duration(200)
             // .style("opacity", .8)
-        d3.select(this)
-            .transition()
-            .duration(200)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("stroke", "transparent")
+
+            // tooltip
+            tooltip1
+                .style("opacity", 0)
+        }
+
+        // Draw the map
+        svg.append("g")
+            .selectAll("path")
+            .data(topo.features)
+            .enter()
+            .append("path")
+
+            // draw each country
+            .attr("d", d3.geoPath()
+                .projection(projection)
+            )
+
+            // set the color of each country
+            .attr("fill", function (d) {
+                d.total = data1.get(d.properties.ISO_A3) || 0;
+                return colorScale(d.total);
+            })
             .style("stroke", "transparent")
+            .attr("class", function(d) { return d.properties.ADMIN } )
+            .style("opacity", .8)
+            .on("mouseover", mouseOver)
+            .on("mouseleave", mouseLeave)
+            .on("mousemove", mouseMove)
 
-        // tooltip
-        d3.selectAll("#annotation")
-            // .style("opacity", 1)
-            .style("opacity", 0)
-    }
-
-    // Draw the map
-    svg.append("g")
-        .selectAll("path")
-        .data(topo.features)
-        .enter()
-        .append("path")
-
-        // draw each country
-        .attr("d", d3.geoPath()
-            .projection(projection)
-        )
-
-        // set the color of each country
-        .attr("fill", function (d) {
-            d.total = data1.get(d.properties.ISO_A3) || 0;
-            return colorScale(d.total);
-        })
-        .style("stroke", "transparent")
-        .attr("class", function(d) { return d.properties.ADMIN } )
-        .style("opacity", .8)
-        .on("mouseover", mouseOver)
-        .on("mouseleave", mouseLeave)
-
-   // svg = d3.select("#page1_desc")
-    //data1 = d3.select("#page1_desc");
-})
+    })
     // PIE CHART CODE STARTS HERE
     // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
     // set the dimensions and margins of the graph
@@ -296,7 +274,18 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     let groupsBar = data.map(d => d.continent);
 
-    let subGroupBar = ['mismanaged_plastic_waste_in_2010(tonnes)', 'mismanaged_plastic_waste_in_2025(tonnes)'];
+    let subGroupBar = ['waste2010', 'waste2025'];
+    let continentWaste = [];
+    data.reduce(function (res, value) {
+        if (!res[value.continent]) {
+            res[value.continent] = {continent: value.continent, waste2010: 0, waste2025: 0};
+            continentWaste.push(res[value.continent])
+        }
+        res[value.continent].waste2010 += parseInt(value['mismanaged_plastic_waste_in_2010(tonnes)']);
+        res[value.continent].waste2025 += parseInt(value['mismanaged_plastic_waste_in_2025(tonnes)']);
+        return res;
+        }, {});
+    //for (var i = 0; i < waste2010.length;
 
     let svg3 = d3.select("#page2_desc")
         .append("svg")
@@ -326,7 +315,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
 
     // add y axis
     let yAxisBar = d3.scaleLinear()
-        .domain([0, 20000000])
+        .domain([0, 52000000])
         .range([ heightBar, 0 ]);
     svg3.append('g')
         .call(d3.axisLeft(yAxisBar).ticks(10));
@@ -351,34 +340,31 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .domain(subGroupBar)
         .range(['salmon','cornflowerblue'])
 
-//Tooltip Set-up
-    const yTooltipOffsetBar = 0;
-
-
-// Add div for tooltip to webpage
+    let tooltipOffsetBar = 10;
+    // Add div for tooltip to webpage
     const tooltipBar = d3.select("#page2_desc")
         .append("div")
-        .attr('id', "tooltip")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
+        .classed('tooltip', true);
 
     let formatted = d3.format(",")
 
 // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseoverbar = function(event, d) {
-        tooltipBar.html(formatted(d.value) + " Tonnes")
-            .style("opacity", 1)
-        ;
+        d3.select(this).style('stroke', 'black');
+        tooltipBar.html('Mismanaged waste: ' + formatted(d.value) + " Tonnes")
+            .style("opacity", 1);
     }
 
 // Position tooltip to follow mouse
     const mousemovebar = function(event, d) {
-        tooltipBar.style("left", (event.pageX) + "px")
-            .style("top", (event.pageY + yTooltipOffsetBar) + "px");
+        tooltipBar.style("left", (event.pageX + tooltipOffsetBar) + "px")
+            .style("top", (event.pageY + tooltipOffsetBar) + "px");
     }
 
 // Return tooltip to transparent when mouse leaves
     const mouseleavebar = function(event, d) {
+        d3.select(this)
+            .style('stroke', 'none');
         tooltipBar.style("opacity", 0);
     }
 
@@ -386,7 +372,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
     // add the bars
     svg3.append('g')
         .selectAll('g')
-        .data(data)
+        .data(continentWaste)
         .join('g')
         .attr('transform', d => `translate(${xAxisBar(d.continent)}, 0)`)
         .selectAll('rect')
@@ -397,6 +383,7 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
         .attr('width', xSubGroupBar.bandwidth())
         .attr('height', d => heightBar - yAxisBar(d.value))
         .attr('fill', d => colorBar(d.key))
+        .attr('stroke-width', 4)
         .on("mouseover", mouseoverbar)
         .on("mousemove", mousemovebar)
         .on("mouseleave", mouseleavebar);
@@ -491,32 +478,32 @@ myDataPromises = Promise.all(promises).then(function(mydata) {
             .attr("text-anchor", "end")
             .text("Mismanaged Waste (kg/person/day)")
         );
-//Tooltip Set-up
-const yTooltipOffset = 15;
-
 
 // Add div for tooltip to webpage
 const tooltip = d3.select("#page2_desc")
     .append("div")
-    .attr('id', "tooltip")
-    .style("opacity", 0)
-    .attr("class", "tooltip");
+    .classed('tooltip', true);
 
 // Add values to tooltip on mouseover, make tooltip div opaque
 const mouseover = function(event, d) {
+    d3.select(this)
+        .style('stroke', 'black');
     tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
         .style("opacity", 1);
 }
 
 // Position tooltip to follow mouse
 const mousemove = function(event, d) {
-    tooltip.style("left", (event.pageX) + "px")
-        .style("top", (event.pageY + yTooltipOffset) + "px");
+    tooltip.style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY + 10) + "px");
 }
 
 // Return tooltip to transparent when mouse leaves
 const mouseleave = function(event, d) {
+    d3.select(this)
+        .style('stroke', 'none');
     tooltip.style("opacity", 0);
+
 }
 
 svg4.selectAll(".point")
@@ -528,6 +515,7 @@ svg4.selectAll(".point")
     .attr("r", 8)
     .attr("fill", "cornflowerblue")
     .style("opacity", 0.5)
+    .style('stroke-width', 2)
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
@@ -535,7 +523,7 @@ svg4.selectAll(".point")
 
 });
 
-function openCity(evt, cityName) {
+function openPage(evt, pageName) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -552,6 +540,8 @@ function openCity(evt, cityName) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(cityName).style.display = "block";
+    document.getElementById(pageName).style.display = "block";
     evt.currentTarget.className += " active";
 }
+
+document.getElementById("defaultOpen").click();
