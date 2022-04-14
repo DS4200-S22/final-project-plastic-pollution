@@ -233,9 +233,9 @@ d3.csv("data/updated_data.csv").then((data) => {
 
     const tooltip2 = d3.select("#page3_desc")
         .append("div")
-        .attr('id', "tooltip2")
+        .attr('id', "tooltip")
         .style("opacity", 0)
-        .attr("class", "tooltip2");
+        .attr("class", "tooltip");
 
 
 // Add values to tooltip on mouseover, make tooltip div opaque
