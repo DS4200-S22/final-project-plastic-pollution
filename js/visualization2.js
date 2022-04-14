@@ -52,6 +52,7 @@ d3.csv("data/updated_data.csv").then((data) => {
             .attr("class", "legendQuant")
             .attr("transform", "translate(" + legend_x + "," + legend_y+")")
 
+        // construct a color legend
         let legendLinear = d3.legendColor()
             .title("Waste Generation (kg/day)")
             .shapeWidth(25)
@@ -61,6 +62,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         svg.select(".legendQuant")
             .call(legendLinear)
 
+        // mouseover event
         let mouseOver = function(d, event) {
             d3.selectAll(".Country")
                 .transition()
@@ -77,17 +79,18 @@ d3.csv("data/updated_data.csv").then((data) => {
 
          let formatted = d3.format(",")
 
+        // mouse move event
         let mouseMove = function(d, event) {
             tooltip1
-                .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + formatted(event.total) + " kg/day")
+                .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation Rate: " + formatted(event.total) + " kg/day")
                 .style("text-align", "center")
         }
 
+        // mouse leave event
         let mouseLeave = function(d) {
             d3.selectAll(".Country")
                 .transition()
                 .duration(200)
-            // .style("opacity", .8)
             d3.select(this)
                 .transition()
                 .duration(200)
@@ -159,6 +162,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         .append("g")
         .attr("transform", "translate(" + chart.width / 2 + "," + chart.height / 2 + ")");
 
+    // aggregate waste generation rate by the different economic statuses
     let averages = d3
         .rollups(
             data,
@@ -167,6 +171,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         )
         .map(([k, v]) => ({economic_status: k, 'waste_generation_rate(kg/person/day)': v}));
 
+    // economic status variables names
     const economicStatusNames = {
         LMI: "Low Middle Income",
         UMI: "Upper Middle Income",
@@ -226,11 +231,9 @@ d3.csv("data/updated_data.csv").then((data) => {
     svg2.append("text").attr("x", -300).attr("y", -215).text("Comparison of Waste Generation Per Day Per Person by Economic Status").style("font-size", "20px").attr("alginment-baseline", "bottom")
 
     //Tooltip Set-up
-
     const yTooltipOffset2 = 15;
 
-// Add div for tooltip to webpage
-
+    // Add div for tooltip to webpage
     const tooltip2 = d3.select("#page3_desc")
         .append("div")
         .attr('id', "tooltip")
@@ -238,7 +241,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         .attr("class", "tooltip");
 
 
-// Add values to tooltip on mouseover, make tooltip div opaque
+    // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseover2 = function(event, d) {
         let avg_waste_gen = averages.map(function(d) {
             return (d['waste_generation_rate(kg/person/day)']); });
@@ -250,15 +253,13 @@ d3.csv("data/updated_data.csv").then((data) => {
 
     }
 
-// Position tooltip to follow mouse
-
+    // Position tooltip to follow mouse
     const mousemove2 = function(event, d) {
         tooltip2.style("left", (event.pageX) + "px")
             .style("top", (event.pageY + yTooltipOffset2) + "px");
     }
 
-// Return tooltip to transparent when mouse leaves
-
+    // Return tooltip to transparent when mouse leaves
     const mouseleave2 = function(event, d) {
         tooltip2.style("opacity", 0);
     }
@@ -269,13 +270,17 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 
     // -- GROUPED BARCHART STARTS HERE--
+    // set dinemsions for graph
     let marginBar = {top: 20, right: 80, bottom: 80, left: 120},
         widthBar = 500,
         heightBar = 500;
 
+    // initalize bar group for continents
     let groupsBar = data.map(d => d.continent);
 
+    // initialize double bar sub groups
     let subGroupBar = ['waste2010', 'waste2025'];
+
     let continentWaste = [];
     data.reduce(function (res, value) {
         if (!res[value.continent]) {
@@ -287,7 +292,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         return res;
     }, {});
 
-    console.log(continentWaste)
+    // append the svg object
     let svg3 = d3.select("#bar_viz")
         .append("svg")
         .attr('preserveAspectRatio', 'xMidYMid meet')
@@ -348,25 +353,26 @@ d3.csv("data/updated_data.csv").then((data) => {
         .classed('tooltip', true);
 
 
-// Add values to tooltip on mouseover, make tooltip div opaque
+    // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseoverbar = function(event, d) {
         d3.select(this).style('opacity', 1);
         tooltipBar.html('Mismanaged waste: ' + formatted(d.value) + " Tonnes")
             .style("opacity", 1);
     }
 
-// Position tooltip to follow mouse
+    // Position tooltip to follow mouse
     const mousemovebar = function(event, d) {
         tooltipBar.style("left", (event.pageX + tooltipOffsetBar) + "px")
             .style("top", (event.pageY + tooltipOffsetBar) + "px");
     }
 
-// Return tooltip to transparent when mouse leaves
+    // Return tooltip to transparent when mouse leaves
     const mouseleavebar = function(event, d) {
         d3.select(this).style('opacity', 0.8);
         tooltipBar.style("opacity", 0);
     }
 
+    // make bars clickable and highlight circles on scatter plot
     const clickbar = function(event, d) {
         continent = d.continent;
         circles.classed('brushed', false);
@@ -488,6 +494,7 @@ d3.csv("data/updated_data.csv").then((data) => {
             .text("Mismanaged Waste (kg/person/day)")
         );
 
+    // initalize brush
     let brush = d3.brush().on('start brush', selectCircles)
     svg4.call(brush);
     brush.on('end', function(event) {
@@ -523,6 +530,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         tooltip.style("opacity", 0);
     }
 
+    // add points
     circles = svg4.selectAll(".point")
         .data(data)
         .enter()
@@ -538,12 +546,14 @@ d3.csv("data/updated_data.csv").then((data) => {
         .on("mousemove", mousemove)
         .on("mouseleave", mouseleave);
 
+    // add continent labels
     let continentLabel = d3.select('#scatter_viz')
         .append('text')
         .attr('x', 450)
         .attr('y', 100)
         .style('font-size', 25);
 
+    // call when scatterplot is brushed
     function selectCircles() {
         selected = d3.brushSelection(this);
         if (selected == null){
@@ -564,6 +574,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         linkBarChart(svg4.selectAll('.brushed').data());
     };
 
+    // bold bars in bar chart when scatterplot is brushed
     function linkBarChart(selectedData) {
         continents = [];
         for (i = 0; i < selectedData.length; i++) {
