@@ -7,10 +7,10 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 
 // The svg
-let svg = d3.select("#my_dataviz"),
-    width1 = +svg.attr("width"),
-    height1 = +svg.attr("height"),
-    margin1 = {top: 50, right: 100, bottom: 50, left: 50};
+    let svg = d3.select("#my_dataviz"),
+        width1 = +svg.attr("width"),
+        height1 = +svg.attr("height"),
+        margin1 = {top: 50, right: 100, bottom: 50, left: 50};
 
 // Map and projection
     let path = d3.geoPath();
@@ -284,10 +284,10 @@ let svg = d3.select("#my_dataviz"),
         res[value.continent].waste2010 += parseInt(value['mismanaged_plastic_waste_in_2010(tonnes)']);
         res[value.continent].waste2025 += parseInt(value['mismanaged_plastic_waste_in_2025(tonnes)']);
         return res;
-        }, {});
+    }, {});
     //for (var i = 0; i < waste2010.length;
-
-    let svg3 = d3.select("#page2_desc")
+    console.log(continentWaste)
+    let svg3 = d3.select("#bar_viz")
         .append("svg")
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .attr('width', '100%')
@@ -303,13 +303,13 @@ let svg = d3.select("#my_dataviz"),
         .padding([0.2])
     svg3.append('g')
         .attr('transform', `translate(0, ${heightBar})`)
+        .style('font-size', '12px')
         .call(d3.axisBottom(xAxisBar).tickSize(0));
 
     // add x axis label
     svg3.append('text')
         .attr('x', widthBar/2 - marginBar.right)
         .attr('y', heightBar + marginBar.top * 2)
-        .style('stroke', 'black')
         .style('font-size', '20px')
         .text('Continent');
 
@@ -318,13 +318,13 @@ let svg = d3.select("#my_dataviz"),
         .domain([0, 52000000])
         .range([ heightBar, 0 ]);
     svg3.append('g')
+        .style('font-size', '12px')
         .call(d3.axisLeft(yAxisBar).ticks(10));
 
     // add y axis label
     svg3.append('text')
-        .attr('y', - marginBar.right)
+        .attr('y', - 100)
         .attr('x', -widthBar/2 - marginBar.bottom * 2)
-        .style('stroke', 'black')
         .attr('transform', 'rotate(-90)')
         .style('font-size', '20px')
         .text('Mismanaged Plastic Waste (Tonnes)');
@@ -340,7 +340,7 @@ let svg = d3.select("#my_dataviz"),
         .domain(subGroupBar)
         .range(['salmon','cornflowerblue'])
 
-    let tooltipOffsetBar = 10;
+    let tooltipOffsetBar = 15;
     // Add div for tooltip to webpage
     const tooltipBar = d3.select("#page2_desc")
         .append("div")
@@ -350,7 +350,7 @@ let svg = d3.select("#my_dataviz"),
 
 // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseoverbar = function(event, d) {
-        d3.select(this).style('stroke', 'black');
+        d3.select(this).style('opacity', 1);
         tooltipBar.html('Mismanaged waste: ' + formatted(d.value) + " Tonnes")
             .style("opacity", 1);
     }
@@ -363,30 +363,41 @@ let svg = d3.select("#my_dataviz"),
 
 // Return tooltip to transparent when mouse leaves
     const mouseleavebar = function(event, d) {
-        d3.select(this)
-            .style('stroke', 'none');
+        d3.select(this).style('opacity', 0.8);
         tooltipBar.style("opacity", 0);
+    }
+
+    const clickbar = function(event, d) {
+        continent = d.continent;
+        circles.classed('brushed', false);
+        circles.classed('continent', function(d) {
+            return d.continent == continent;
+        });
+        continentLabel.text('Continent: ' + continent);
+        bars.style('stroke', 'none');
     }
 
 // svg3.append(tooltipBar);
     // add the bars
-    svg3.append('g')
+    let bars = svg3.append('g')
         .selectAll('g')
         .data(continentWaste)
         .join('g')
         .attr('transform', d => `translate(${xAxisBar(d.continent)}, 0)`)
         .selectAll('rect')
-        .data(function(d) { return subGroupBar.map(function(key) { return {key: key, value: d[key]}; }); })
+        .data(function(d) { return subGroupBar.map(function(key) { return {key: key, value: d[key], continent: d.continent}; }); })
         .join('rect')
         .attr('x', d => xSubGroupBar(d.key))
         .attr('y', d => yAxisBar(d.value))
         .attr('width', xSubGroupBar.bandwidth())
         .attr('height', d => heightBar - yAxisBar(d.value))
         .attr('fill', d => colorBar(d.key))
-        .attr('stroke-width', 4)
+        .style('stroke-width', 4)
+        .style('opacity', 0.8)
         .on("mouseover", mouseoverbar)
         .on("mousemove", mousemovebar)
-        .on("mouseleave", mouseleavebar);
+        .on("mouseleave", mouseleavebar)
+        .on("click", clickbar);
 
     // svg3.append(tooltipBar);
 
@@ -417,16 +428,16 @@ let svg = d3.select("#my_dataviz"),
         .style('font-size', '15px')
 
 // -----------Scatterplot:-------------
-    const margin3 = {top: 50, right: 50, bottom: 50, left: 30};
-    const width3 = 1000; //- margin3.left - margin.right;
-    const height3 = 600; //- margin.top - margin.bottom;
+    const margin3 = {top: 50, right: 70, bottom: 45, left: 70};
+    const width3 = 850; //- margin3.left - margin.right;
+    const height3 = 550; //- margin.top - margin.bottom;
 
 // Append svg object to the body of the page to house the scatterplot
 
-    const svg4 = d3.select("#page2_desc")
+    const svg4 = d3.select("#scatter_viz")
         .append("svg")
-        .attr("width", width3 - margin3.left - margin3.right)
-        .attr("height", height3 - margin3.top - margin3.bottom)
+        .attr("width", width3)//+ margin3.left + margin3.right)
+        .attr("height", height3)// + margin3.top + margin3.bottom)
         .attr("viewBox", [0, 0, width3 + 20, height3 + 20]);
 
     let xKey1 = "coastal_population";
@@ -438,7 +449,7 @@ let svg = d3.select("#my_dataviz"),
     });
 
     // Create X scale
-    x3 = d3.scaleLinear()
+    let x3 = d3.scaleLinear()
         .domain([0, maxX1])
         .range([margin3.left, width3 - margin3.right]);
 
@@ -446,12 +457,13 @@ let svg = d3.select("#my_dataviz"),
     svg4.append("g")
         .attr("transform", `translate(0,${height3 - margin3.bottom})`)
         .call(d3.axisBottom(x3))
-        .attr("font-size", '10px')
+        .attr("font-size", '15px')
         .call((g) => g.append("text")
             .attr("x", width3 / 2)
             .attr("y", margin3.bottom - 4)
             .attr("fill", "black")
             .attr("text-anchor", "end")
+            .attr("font-size", '20px')
             .text("Coastal Population")
         );
 
@@ -461,7 +473,7 @@ let svg = d3.select("#my_dataviz"),
     });
 
     // Create Y scale
-    y3 = d3.scaleLinear()
+    let y3 = d3.scaleLinear()
         .domain([0, maxY1])
         .range([height3 - margin3.bottom, margin3.top]);
 
@@ -469,58 +481,103 @@ let svg = d3.select("#my_dataviz"),
     svg4.append("g")
         .attr("transform", `translate(${margin3.left}, 0)`)
         .call(d3.axisLeft(y3))
-        .attr("font-size", '10px')
+        .attr("font-size", '15px')
         .call((g) => g.append("text")
             .attr("x", -(height3 / 3))
             .attr("transform", `rotate(-90)`)
             .attr("y", margin3.top - 100)
             .attr("fill", "black")
             .attr("text-anchor", "end")
+            .attr("font-size", '20px')
             .text("Mismanaged Waste (kg/person/day)")
         );
 
-// Add div for tooltip to webpage
-const tooltip = d3.select("#page2_desc")
-    .append("div")
-    .classed('tooltip', true);
+    let brush = d3.brush().on('start brush', selectCircles)
+    svg4.call(brush);
+    brush.on('end', function(event) {
+        if(event.sourceEvent!==undefined&&event.sourceEvent.type!='end'){
+            svg4.call(brush.move, null)
+        }
+    })
+    // Add div for tooltip to webpage
+    let tooltipOffsetScatter = 15;
 
-// Add values to tooltip on mouseover, make tooltip div opaque
-const mouseover = function(event, d) {
-    d3.select(this)
-        .style('stroke', 'black');
-    tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
-        .style("opacity", 1);
-}
+    const tooltip = d3.select("#page2_desc")
+        .append("div")
+        .classed('tooltip', true);
 
-// Position tooltip to follow mouse
-const mousemove = function(event, d) {
-    tooltip.style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY + 10) + "px");
-}
+    // Add values to tooltip on mouseover, make tooltip div opaque
+    const mouseover = function(event, d) {
+        d3.select(this).style('opacity', 1);
+        tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+            .style("opacity", 1);
+    }
 
-// Return tooltip to transparent when mouse leaves
-const mouseleave = function(event, d) {
-    d3.select(this)
-        .style('stroke', 'none');
-    tooltip.style("opacity", 0);
+    // Position tooltip to follow mouse
+    const mousemove = function(event, d) {
+        tooltip.style("left", (event.pageX + tooltipOffsetScatter) + "px")
+            .style("top", (event.pageY + tooltipOffsetScatter) + "px");
+    }
 
-}
+    // Return tooltip to transparent when mouse leaves
+    const mouseleave = function(event, d) {
+        d3.select(this).style('opacity', 0.5);
+        tooltip.style("opacity", 0);
+    }
 
-svg4.selectAll(".point")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", (d) => x3(d[xKey1]))
-    .attr("cy", (d) => y3(d[yKey1]))
-    .attr("r", 8)
-    .attr("fill", "cornflowerblue")
-    .style("opacity", 0.5)
-    .style('stroke-width', 2)
-    .on("mouseover", mouseover)
-    .on("mousemove", mousemove)
-    .on("mouseleave", mouseleave);
-//(tooltip);
+    circles = svg4.selectAll(".point")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => x3(d[xKey1]))
+        .attr("cy", (d) => y3(d[yKey1]))
+        .attr("r", 8)
+        .attr("fill", "cornflowerblue")
+        .style("opacity", 0.5)
+        .style('stroke-width', 1)
+        .style('stroke', 'black')
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
 
+    let continentLabel = d3.select('#scatter_viz')
+        .append('text')
+        .attr('x', 450)
+        .attr('y', 100)
+        .style('font-size', 25);
+
+    function selectCircles() {
+        selected = d3.brushSelection(this);
+        if (selected == null){
+            return;
+        }
+        selectedCircles = []
+        continentLabel.text('');
+        circles.classed('continent', false);
+        circles.classed('brushed', function(d) {
+            xMin = selected[0][0],
+                xMax = selected[1][0],
+                yMin = selected[0][1],
+                yMax = selected[1][1],
+                xValue = x3(d[xKey1]),
+                yValue = y3(d[yKey1])
+            return (xValue >= xMin && xValue <= xMax && yValue >= yMin && yValue <= yMax);
+        });
+        linkBarChart(svg4.selectAll('.brushed').data());
+    };
+
+    function linkBarChart(selectedData) {
+        continents = [];
+        for (i = 0; i < selectedData.length; i++) {
+            continent = selectedData[i]['continent']
+            if (!continents.includes(continent)) {
+                continents.push(continent);
+            };
+        };
+        bars.classed('linked', function(d) {
+            return continents.includes(d.continent);
+        });
+    };
 });
 
 function openPage(evt, pageName) {
