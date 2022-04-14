@@ -1,4 +1,4 @@
-// Read in data and print to console
+// Read in data
 d3.csv("data/updated_data.csv").then((data) => {
 
 // -----------Map:-------------
@@ -589,6 +589,8 @@ d3.csv("data/updated_data.csv").then((data) => {
     };
 });
 
+
+// function that will open and switch to different pages
 function openPage(evt, pageName) {
     // Declare all variables
     let i, tabcontent, tablinks;
@@ -607,4 +609,5 @@ function openPage(evt, pageName) {
     evt.currentTarget.className += " active";
 }
 
+// sets the map view to open on default
 document.getElementById("defaultOpen").click();
