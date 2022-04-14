@@ -374,7 +374,7 @@ d3.csv("data/updated_data.csv").then((data) => {
             return d.continent == continent;
         });
         continentLabel.text('Continent: ' + continent);
-        bars.style('stroke', 'none');
+        bars.classed('linked', false);
     }
 
     // add the bars
