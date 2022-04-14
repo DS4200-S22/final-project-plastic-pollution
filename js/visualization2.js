@@ -1,10 +1,8 @@
 // Read in data and print to console
 d3.csv("data/updated_data.csv").then((data) => {
 
-// WORLD MAP CODE STARTS HERE...
+// -----------Map:-------------
 // SOURCE1: https://d3-graph-gallery.com/graph/choropleth_hover_effect.html
-// SOURCE2:
-
 
 // The svg
     let svg = d3.select("#my_dataviz"),
@@ -77,9 +75,11 @@ d3.csv("data/updated_data.csv").then((data) => {
                 .style("opacity", 1)
         }
 
+         let formatted = d3.format(",")
+
         let mouseMove = function(d, event) {
             tooltip1
-                .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + event.total + " kg/day")
+                .html("Country Name: " + event.properties.ADMIN + "<br>Waste Generation: " + formatted(event.total) + " kg/day")
                 .style("text-align", "center")
         }
 
@@ -123,8 +123,9 @@ d3.csv("data/updated_data.csv").then((data) => {
             .on("mousemove", mouseMove)
 
     })
-    // PIE CHART CODE STARTS HERE
+// -----------Pie Chart:-------------
     // SOURCE: https://www.geeksforgeeks.org/d3-js-pie-function/
+
     // set the dimensions and margins of the graph
     let margin2 = {
         top: 30,
@@ -285,7 +286,7 @@ d3.csv("data/updated_data.csv").then((data) => {
         res[value.continent].waste2025 += parseInt(value['mismanaged_plastic_waste_in_2025(tonnes)']);
         return res;
     }, {});
-    //for (var i = 0; i < waste2010.length;
+
     console.log(continentWaste)
     let svg3 = d3.select("#bar_viz")
         .append("svg")
@@ -346,7 +347,6 @@ d3.csv("data/updated_data.csv").then((data) => {
         .append("div")
         .classed('tooltip', true);
 
-    let formatted = d3.format(",")
 
 // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseoverbar = function(event, d) {
@@ -377,7 +377,6 @@ d3.csv("data/updated_data.csv").then((data) => {
         bars.style('stroke', 'none');
     }
 
-// svg3.append(tooltipBar);
     // add the bars
     let bars = svg3.append('g')
         .selectAll('g')
@@ -398,8 +397,6 @@ d3.csv("data/updated_data.csv").then((data) => {
         .on("mousemove", mousemovebar)
         .on("mouseleave", mouseleavebar)
         .on("click", clickbar);
-
-    // svg3.append(tooltipBar);
 
     // add a legend
     svg3.append('rect')
@@ -433,7 +430,6 @@ d3.csv("data/updated_data.csv").then((data) => {
     const height3 = 550; //- margin.top - margin.bottom;
 
 // Append svg object to the body of the page to house the scatterplot
-
     const svg4 = d3.select("#scatter_viz")
         .append("svg")
         .attr("width", width3)//+ margin3.left + margin3.right)
@@ -506,10 +502,12 @@ d3.csv("data/updated_data.csv").then((data) => {
         .append("div")
         .classed('tooltip', true);
 
+    let formatted = d3.format(",")
+
     // Add values to tooltip on mouseover, make tooltip div opaque
     const mouseover = function(event, d) {
         d3.select(this).style('opacity', 1);
-        tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + d[xKey1])
+        tooltip.html("Country: " + d.country + "<br> Waste Generation (kg/person/day): " + d[yKey1] + "<br>Coastal Population: " + formatted(d[xKey1]))
             .style("opacity", 1);
     }
 
@@ -582,20 +580,17 @@ d3.csv("data/updated_data.csv").then((data) => {
 
 function openPage(evt, pageName) {
     // Declare all variables
-    var i, tabcontent, tablinks;
-
+    let i, tabcontent, tablinks;
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
-
     // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(pageName).style.display = "block";
     evt.currentTarget.className += " active";
